@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>合作拍攝表單填寫｜玄鹿 xuan_lu9</title>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://a091273941999999-sys.github.io/">
+<meta property="og:title" content="玄鹿 xuan_lu9｜合作拍攝表單填寫">
+<meta property="og:description" content="喜歡光影、奇怪主題、復古風。看作品、選主題，直接線上報名合作拍攝。">
+<meta property="og:image" content="https://a091273941999999-sys.github.io/cover.jpg">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="847">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="玄鹿 @xuan_lu9 人像攝影｜喜歡光影、奇怪主題、復古風。合作拍攝報名表單。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,6 +99,18 @@
   .lb-btn { position: absolute; background: rgb(255 255 255 / .08); color: #fff; border: 0; width: 44px; height: 44px; border-radius: 50%; font-size: 22px; cursor: pointer; }
   .lb-btn:hover { background: rgb(255 255 255 / .18); }
   .lb-close { top: 16px; right: 16px; } .lb-prev { left: 16px; } .lb-next { right: 16px; }
+  .lb-cap { position: absolute; top: 22px; left: 70px; right: 70px; text-align: center; color: #ddd; font-size: 14px; margin: 0; }
+  .lb-cap a { color: var(--amber); font-weight: 700; }
+  .credit { position: absolute; right: 8px; bottom: 8px; z-index: 1; font-size: 12px; color: #fff; background: rgb(0 0 0 / .55); padding: 2px 10px; border-radius: 999px; text-decoration: none; }
+  .credit:hover { color: var(--amber); }
+  .faq { display: grid; gap: 10px; }
+  .faq details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; }
+  .faq summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; color: var(--amber); font-size: 20px; line-height: 1; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq details p { margin: 10px 0 0; color: #cfcac2; }
+  .faq b { color: var(--amber); }
 
   /* ── 主題卡片 ── */
   .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -201,6 +221,7 @@
   <a class="l hide-sm" href="#works">作品</a>
   <a class="l" href="#themes">主題</a>
   <a class="l" href="#rulesCard">守則</a>
+  <a class="l hide-sm" href="#faq">Q&amp;A</a>
   <a class="l cta" href="#f">我要約拍</a>
 </nav>
 
@@ -273,9 +294,14 @@
     </ol>
   </section>
 
+  <section id="faq" hidden>
+    <div class="sec-head"><span class="num">04</span><h2>常見問題</h2><p>還有其他問題，歡迎 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊我</a>。</p></div>
+    <div class="faq" id="faqList"></div>
+  </section>
+
   <!-- 欄位名稱 entry.xxx 對應 Google 表單的題目；送出的資料會進試算表「表單回覆 1」 -->
   <section>
-    <div class="sec-head"><span class="num">04</span><h2>我要約拍</h2><p>填完送出後，我會透過 IG 或你留的聯絡方式跟你聯繫。</p></div>
+    <div class="sec-head"><span class="num">05</span><h2>我要約拍</h2><p>填完送出後，我會透過 IG 或你留的聯絡方式跟你聯繫。</p></div>
   <form id="f">
     <input type="hidden" name="entry.928746135" id="role" value="模特兒">
 
@@ -349,6 +375,7 @@
 </div>
 
 <div class="lightbox" id="lb" hidden>
+  <p class="lb-cap" id="lbCap"></p>
   <button class="lb-btn lb-close" id="lbClose" aria-label="關閉">✕</button>
   <button class="lb-btn lb-prev" id="lbPrev" aria-label="上一張">‹</button>
   <img id="lbImg" alt="">
@@ -383,7 +410,7 @@
     shown = t === '全部' ? WORKS : WORKS.filter(w => w.theme === t);
     $$('#filters .chip').forEach(c => c.classList.toggle('on', c.dataset.t === t));
     gallery.innerHTML = shown.map((w, i) =>
-      '<figure data-i="' + i + '"><img src="' + (w.thumb || w.src) + '" alt="' + w.theme + '作品" loading="lazy"><figcaption>' + w.theme + '</figcaption></figure>').join('') +
+      '<figure data-i="' + i + '"><img src="' + (w.thumb || w.src) + '" alt="' + w.theme + '作品" loading="lazy"><figcaption>' + w.theme + '</figcaption>' + (w.credit ? '<a class="credit" href="https://www.instagram.com/' + w.credit + '/" target="_blank" rel="noopener">@' + w.credit + '</a>' : '') + '</figure>').join('') +
       '<a class="more-card" href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener"><b>更多作品</b>IG @xuan_lu9 →</a>';
     // 走馬燈：照片夠多時複製一份接在後面，捲到一半就無縫接回開頭
     gallery.dataset.n = shown.length + 1;
@@ -429,8 +456,12 @@
   requestAnimationFrame(marquee);
   const lb = $('#lb'), lbImg = $('#lbImg');
   let cur = 0;
-  const openLb = i => { cur = (i + shown.length) % shown.length; lbImg.src = shown[cur].src; lb.hidden = false; };
-  $('#gallery')?.addEventListener('click', e => { const fg = e.target.closest('figure'); if (fg) openLb(+fg.dataset.i); });
+  const openLb = i => {
+    cur = (i + shown.length) % shown.length; const w = shown[cur];
+    lbImg.src = w.src; lb.hidden = false;
+    $('#lbCap').innerHTML = w.theme + (w.credit ? '　·　Model <a href="https://www.instagram.com/' + w.credit + '/" target="_blank" rel="noopener">@' + w.credit + '</a>' : '');
+  };
+  $('#gallery')?.addEventListener('click', e => { if (e.target.closest('.credit')) return; const fg = e.target.closest('figure'); if (fg) openLb(+fg.dataset.i); });
   $('#lbClose').onclick = () => lb.hidden = true;
   $('#lbPrev').onclick = () => openLb(cur - 1);
   $('#lbNext').onclick = () => openLb(cur + 1);
@@ -552,7 +583,11 @@
     if (d.rules && d.rules.length) $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join('');
     if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join('');
     if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join('');
-    WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme })));
+    if (d.faq && d.faq.length) {
+      $('#faqList').innerHTML = d.faq.map(x => '<details><summary>' + esc(x.q) + '</summary><p>' + md(x.a) + '</p></details>').join('');
+      $('#faq').hidden = false;
+    }
+    WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
     initGallery(true);
   }).catch(() => initGallery(true));
 </script>
