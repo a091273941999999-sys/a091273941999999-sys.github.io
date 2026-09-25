@@ -109,6 +109,7 @@
   .item.has-img { min-height: 170px; display: flex; flex-direction: column; justify-content: flex-end; border-color: rgb(255 255 255 / .08);
     background: linear-gradient(to bottom, rgb(13 16 21 / .15), rgb(13 16 21 / .88) 75%), var(--img) center 30% / cover; }
   .item.has-img .no { color: #d9d4cc; }
+  .item.has-img { transition: background-image .8s ease, border-color .2s, transform .2s; }
   .item.has-img .tag { background: rgb(0 0 0 / .35); color: #e6e1d9; border-color: rgb(255 255 255 / .18); }
   .item.has-img.on { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) inset; }
   .chip small { margin-left: 6px; opacity: .65; font-size: 12px; }
@@ -387,6 +388,17 @@
   initGallery(false);
   $('#gPrev').onclick = () => gallery.scrollBy({ left: -gallery.clientWidth * 0.8 });
   $('#gNext').onclick = () => gallery.scrollBy({ left: gallery.clientWidth * 0.8 });
+  // 自動輪播：每 3.5 秒往右一張，到底回到第一張；滑鼠移上去、手指碰到、放大檢視或切到別的分頁時暫停
+  let hold = false, idle = 0;
+  const step = () => {
+    const f = gallery.querySelector('figure'); if (!f) return;
+    const max = gallery.scrollWidth - gallery.clientWidth;
+    if (gallery.scrollLeft >= max - 5) gallery.scrollTo({ left: 0 }); else gallery.scrollBy({ left: f.offsetWidth + 12 });
+  };
+  ['mouseenter', 'touchstart', 'focusin'].forEach(ev => gallery.parentElement.addEventListener(ev, () => { hold = true; }, { passive: true }));
+  ['mouseleave', 'touchend'].forEach(ev => gallery.parentElement.addEventListener(ev, () => { hold = false; idle = Date.now(); }, { passive: true }));
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+    setInterval(() => { if (!hold && lb.hidden && !document.hidden && !gallery.parentElement.hidden && Date.now() - idle > 4000) step(); }, 3500);
   const lb = $('#lb'), lbImg = $('#lbImg');
   let cur = 0;
   const openLb = i => { cur = (i + shown.length) % shown.length; lbImg.src = shown[cur].src; lb.hidden = false; };
@@ -473,6 +485,21 @@
       const picked = $$('#themeChecks input:checked').map(i => i.value);
       $('#themeChecks').innerHTML = d.themes.map(t => '<label><input type="checkbox" name="entry.1010272532" value="' + esc(t.value) + '"' + (picked.includes(t.value) ? ' checked' : '') + '>' + esc(t.name === '其他' ? t.value : t.name) + '</label>').join('');
       bindThemes(); sync();
+      // 主題卡片背景：每 5 秒換成該主題的下一張照片
+      const byTheme = {};
+      (d.photos || []).forEach(p => (byTheme[p.theme] = byTheme[p.theme] || []).push(p.id));
+      let tick = 0;
+      setInterval(() => {
+        if (document.hidden) return;
+        tick++;
+        $$('.item.has-img').forEach(it => {
+          const l = byTheme[it.querySelector('.name').textContent];
+          if (!l || l.length < 2) return;
+          const url = pic(l[tick % l.length], 800), im = new Image();
+          im.onload = () => it.style.setProperty('--img', 'url(' + url + ')');
+          im.src = url;
+        });
+      }, 5000);
     }
     if (d.rules && d.rules.length) $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join('');
     if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join('');
