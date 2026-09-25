@@ -119,7 +119,7 @@
     <div class="row c4">
       <div><label class="t" for="name">姓名 / 暱稱 *</label><input id="name" type="text" name="entry.1169685776" required></div>
       <div><label class="t" for="ig">IG 帳號</label><input id="ig" type="text" name="entry.775804431" placeholder="@your_ig"></div>
-      <div><label class="t" for="phone">電話 *</label><input id="phone" type="tel" name="entry.119148823" required></div>
+      <div><label class="t" for="phone">聯絡方式（電話或 LINE）</label><input id="phone" type="text" name="entry.119148823" placeholder="選填"></div>
       <div><label class="t" for="area">你住哪個縣市 *</label>
         <select id="area" name="entry.1516773133" required>
           <option value="">請選擇</option><option>台南</option><option>嘉義</option><option>雲林</option><option>其他縣市</option>
@@ -205,6 +205,8 @@
   f.onsubmit = async e => {
     e.preventDefault();
     const fd = new FormData(f);
+    // Google 表單的「電話」仍是必填題，空白會被整筆丟掉，所以補「未填」
+    if (!fd.get('entry.119148823').trim()) fd.set('entry.119148823', '未填');
     if (!areaOther.hidden) fd.set('entry.1166445254', ['【住：' + areaOther.value.trim() + '】', fd.get('entry.1166445254')].filter(Boolean).join(' '));
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
     const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
