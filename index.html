@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>互惠攝影合作報名</title>
+<style>
+  body { font-family: system-ui, "Microsoft JhengHei", sans-serif; background: #f5f5f5; margin: 0; padding: 16px; color: #222; }
+  .card { max-width: 560px; margin: 0 auto 16px; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px #0001; }
+  h1 { margin-top: 0; font-size: 22px; }
+  h2 { margin-top: 0; font-size: 18px; }
+  .rules ol { padding-left: 20px; line-height: 1.7; }
+  .rules li b { color: #ee4d2d; }
+  label.t { display: block; margin: 16px 0 6px; font-weight: 600; }
+  input[type=text], input[type=tel], input[type=email], input[type=url], select, textarea {
+    width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips label { border: 1px solid #ccc; border-radius: 999px; padding: 6px 12px; cursor: pointer; user-select: none; }
+  .chips input { position: absolute; opacity: 0; pointer-events: none; }
+  .chips label:has(input:checked) { background: #ee4d2d; border-color: #ee4d2d; color: #fff; }
+  .chips label:has(input:focus-visible) { outline: 2px solid #ee4d2d; outline-offset: 2px; }
+  .hint { margin: 0 0 8px; color: #666; font-size: 14px; }
+  .agree { display: flex; gap: 8px; align-items: flex-start; margin-top: 20px; }
+  button { margin-top: 20px; width: 100%; padding: 12px; border: 0; border-radius: 8px; background: #ee4d2d; color: #fff; font-size: 16px; cursor: pointer; }
+  button:disabled { opacity: .6; }
+  #msg { margin-top: 12px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="card rules">
+  <h1>📷 互惠攝影合作報名</h1>
+  <p>互惠（TFP）＝ 雙方不收費、不付費，以作品交換作品。報名前請詳閱以下守則：</p>
+  <h2>🤝 互惠守則</h2>
+  <ol>
+    <li><b>不收費也不付費</b>：雙方都不能收取拍攝費、模特費。交通、餐費、場地費原則上各自負擔，或事前講好怎麼分。</li>
+    <li><b>拍攝前確認內容</b>：風格、服裝、地點、時間、拍攝尺度都要在拍攝前講好，<b>拍攝當天不得臨時加碼</b>。</li>
+    <li><b>守時</b>：遲到超過 15 分鐘請主動告知；要取消或改期，請在 <b>24 小時前</b>通知。無故放鳥兩次，不再媒合。</li>
+    <li><b>交件</b>：攝影師在拍攝後 <b>14 天內</b>交付精修照（建議 10 張以上，張數可事前約定）；原檔給不給、給多少，雙方先談好。</li>
+    <li><b>使用範圍</b>：作品雙方都可以用在個人作品集與社群，<b>發文時請互相標註 IG</b>。</li>
+    <li><b>禁止商用</b>：未經對方書面同意，不得把作品用在商業用途、廣告、販售或參賽。</li>
+    <li><b>修圖尊重</b>：模特兒不得自行修改精修圖或加濾鏡後發布；如需調整，請先和攝影師溝通。</li>
+    <li><b>可帶陪同</b>：任何一方都可以帶 1 位陪同者到場，但陪同者不得干擾拍攝。</li>
+    <li><b>尊重與安全</b>：禁止任何騷擾、不當碰觸或越界要求；不舒服時可以隨時中止拍攝。發生違規請向主辦檢舉，我們會永久停權。</li>
+    <li><b>未成年</b>：未滿 18 歲請取得監護人同意，並由監護人陪同拍攝。</li>
+  </ol>
+</div>
+
+<!-- 欄位名稱 entry.xxx 對應 Google 表單的題目；送出的資料會進試算表「表單回覆 1」 -->
+<form id="f" class="card">
+  <label class="t">身分 *</label>
+  <div class="chips">
+    <label><input type="radio" name="entry.928746135" value="模特兒" required>模特兒</label>
+    <label><input type="radio" name="entry.928746135" value="攝影師">攝影師</label>
+    <label><input type="radio" name="entry.928746135" value="妝髮/造型師">妝髮/造型師</label>
+  </div>
+
+  <label class="t" for="name">姓名 / 暱稱 *</label><input id="name" type="text" name="entry.1169685776" required>
+  <label class="t" for="ig">IG 帳號</label><input id="ig" type="text" name="entry.775804431" placeholder="@your_ig">
+  <label class="t" for="phone">電話 *</label><input id="phone" type="tel" name="entry.119148823" required>
+  <label class="t" for="email">Email</label><input id="email" type="email" name="entry.1284457421">
+
+  <label class="t" for="area">地區 *</label>
+  <select id="area" name="entry.1516773133" required>
+    <option value="">請選擇</option><option>北部</option><option>中部</option><option>南部</option><option>東部</option><option>皆可</option>
+  </select>
+
+  <label class="t">想拍的主題 *（可複選）</label>
+  <p class="hint">有其他想拍的主題可以先提出你的概念；沒有概念的話可以參考以下提案。更詳細的主題可以私訊我討論。</p>
+  <div class="chips">
+    <label><input type="checkbox" name="entry.1010272532" value="復古（昭和、台味）">復古（昭和、台味）</label>
+    <label><input type="checkbox" name="entry.1010272532" value="廢墟探勘（新景點開發）">廢墟探勘（新景點開發）</label>
+    <label><input type="checkbox" name="entry.1010272532" value="獵奇（都市傳說、日本妖怪、恐怖故事）">獵奇（都市傳說、日本妖怪、恐怖故事）</label>
+    <label><input type="checkbox" name="entry.1010272532" value="夢核（夢境、違和感、超現實）">夢核（夢境、違和感、超現實）</label>
+    <label><input type="checkbox" name="entry.1010272532" value="衝突美學（視覺、情緒、邏輯）">衝突美學（視覺、情緒、邏輯）</label>
+    <label><input type="checkbox" name="entry.1010272532" value="其他（自己提案）">其他（自己提案）</label>
+  </div>
+
+  <label class="t">可拍時段（可複選）</label>
+  <div class="chips">
+    <label><input type="checkbox" name="entry.2098647330" value="平日白天">平日白天</label>
+    <label><input type="checkbox" name="entry.2098647330" value="平日晚上">平日晚上</label>
+    <label><input type="checkbox" name="entry.2098647330" value="假日白天">假日白天</label>
+    <label><input type="checkbox" name="entry.2098647330" value="假日晚上">假日晚上</label>
+  </div>
+
+  <label class="t" for="concept">想拍的概念</label><textarea id="concept" name="entry.1204499503" rows="3" placeholder="簡單描述你想拍的畫面、情緒或故事"></textarea>
+  <label class="t" for="outfit">想拍的服裝</label><input id="outfit" type="text" name="entry.178669148" placeholder="服裝會依討論後的主題選擇，有很想拍的服裝可以先寫">
+  <label class="t" for="ref">參考圖 / 作品集連結</label><input id="ref" type="url" name="entry.1672338954" placeholder="https://">
+  <label class="t" for="note">備註（器材、可接受尺度…）</label><textarea id="note" name="entry.1166445254" rows="3"></textarea>
+
+  <label class="agree"><input type="checkbox" name="entry.1494154193" value="同意" required> <span>我已閱讀並同意以上<b>互惠守則</b></span></label>
+  <button>送出報名</button>
+  <div id="msg" role="status"></div>
+</form>
+
+<script>
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf2SdMBvLJF1a8exr1lWroJNOvx2_OxJSNjEWIhb50z-DHceA/formResponse';
+  const f = document.getElementById('f'), msg = document.getElementById('msg'), btn = f.querySelector('button');
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const fd = new FormData(f);
+    if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
+    btn.disabled = true; msg.textContent = '送出中…';
+    try {
+      // no-cors：Google 表單不回傳結果，只要請求送出就算成功
+      await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
+      f.reset();
+      msg.textContent = '✅ 報名成功！我們會透過 IG 或電話聯繫你媒合。';
+    } catch {
+      msg.textContent = '❌ 送出失敗，請檢查網路後再試一次';
+    }
+    btn.disabled = false;
+  };
+</script>
+</body>
+</html>
