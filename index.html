@@ -97,6 +97,10 @@
   .item.on { border-color: var(--amber); background: linear-gradient(160deg, var(--amber-dim), var(--card) 70%); }
   .item.on .pick { background: var(--amber); border-color: var(--amber); color: #1a1206; }
   .item.on .pick::before { content: "✓"; }
+  .item.other { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 14px 56px 14px 18px; border-style: dashed; background: transparent; }
+  .item.other .name { margin: 0; font-size: 18px; }
+  .item.other .desc { color: var(--muted); font-size: 14px; }
+  .item.other .pick { top: 50%; transform: translateY(-50%); }
 
   .sub-head { font-family: var(--serif); font-size: 18px; margin: 32px 0 12px; letter-spacing: 1px; }
   .areas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -156,6 +160,7 @@
     main { padding: 0 16px 32px; }
     section { padding-top: 44px; }
     .themes, .areas, .c2, .c3 { grid-template-columns: 1fr; }
+    .item.other { flex-wrap: wrap; gap: 4px 12px; }
     form { padding: 20px 16px; }
     .submit { width: 100%; margin-left: 0; }
     #msg { text-align: left; }
@@ -205,9 +210,10 @@
       <div class="item" data-theme="復古（昭和、台味）"><span class="pick"></span><span class="no">01</span><span class="name">復古</span><span class="tags"><span class="tag">昭和</span><span class="tag">台味</span></span></div>
       <div class="item" data-theme="廢墟探勘（新景點開發）"><span class="pick"></span><span class="no">02</span><span class="name">廢墟探勘</span><span class="tags"><span class="tag">新景點開發</span></span></div>
       <div class="item" data-theme="獵奇（都市傳說、日本妖怪、恐怖故事）"><span class="pick"></span><span class="no">03</span><span class="name">獵奇</span><span class="tags"><span class="tag">都市傳說</span><span class="tag">日本妖怪</span><span class="tag">恐怖故事</span></span></div>
-      <div class="item" data-theme="夢核（夢境、違和感、超現實）"><span class="pick"></span><span class="no">04</span><span class="name">夢核</span><span class="tags"><span class="tag">夢境</span><span class="tag">違和感</span><span class="tag">超現實</span></span></div>
-      <div class="item" data-theme="衝突美學（視覺、情緒、邏輯）"><span class="pick"></span><span class="no">05</span><span class="name">衝突美學</span><span class="tags"><span class="tag">視覺</span><span class="tag">情緒</span><span class="tag">邏輯</span></span></div>
-      <div class="item" data-theme="其他（自己提案）"><span class="pick"></span><span class="no">06</span><span class="name">其他</span><span class="tags"><span class="tag">自己提案</span></span></div>
+      <div class="item" data-theme="奇幻（天使、精靈、童話）"><span class="pick"></span><span class="no">04</span><span class="name">奇幻</span><span class="tags"><span class="tag">天使 / 墮天使</span><span class="tag">精靈</span><span class="tag">童話角色</span></span></div>
+      <div class="item" data-theme="夢核（夢境、違和感、超現實）"><span class="pick"></span><span class="no">05</span><span class="name">夢核</span><span class="tags"><span class="tag">夢境</span><span class="tag">違和感</span><span class="tag">超現實</span></span></div>
+      <div class="item" data-theme="衝突美學（視覺、情緒、邏輯）"><span class="pick"></span><span class="no">06</span><span class="name">衝突美學</span><span class="tags"><span class="tag">視覺</span><span class="tag">情緒</span><span class="tag">邏輯</span></span></div>
+      <div class="item other" data-theme="其他（自己提案）"><span class="pick"></span><span class="name">其他</span><span class="desc">有自己想拍的題材？點這裡，並在下方「想拍的概念」寫給我。</span></div>
     </div>
 
     <h3 class="sub-head">拍攝地區</h3>
@@ -237,7 +243,6 @@
       <li><b>使用範圍</b>作品雙方都可以用在個人作品集與社群，<b>照片採 IG 協作方式發布，發文時請協作 @xuan_lu9</b>。</li>
       <li><b>禁止商用</b>未經對方書面同意，不得把作品用在商業用途、廣告、販售或參賽。</li>
       <li><b>修圖</b>色調跟修臉不限制；修圖前會先給色調樣本確認，喜歡原檔也可以直接 PO。</li>
-      <li><b>可帶陪同</b>任何一方都可以帶 1 位陪同者到場，但陪同者不得干擾拍攝。</li>
     </ol>
   </section>
 
@@ -262,6 +267,7 @@
       <label><input type="checkbox" name="entry.1010272532" value="復古（昭和、台味）">復古</label>
       <label><input type="checkbox" name="entry.1010272532" value="廢墟探勘（新景點開發）">廢墟探勘</label>
       <label><input type="checkbox" name="entry.1010272532" value="獵奇（都市傳說、日本妖怪、恐怖故事）">獵奇</label>
+      <label><input type="checkbox" name="entry.1010272532" value="奇幻（天使、精靈、童話）">奇幻</label>
       <label><input type="checkbox" name="entry.1010272532" value="夢核（夢境、違和感、超現實）">夢核</label>
       <label><input type="checkbox" name="entry.1010272532" value="衝突美學（視覺、情緒、邏輯）">衝突美學</label>
       <label><input type="checkbox" name="entry.1010272532" value="其他（自己提案）">其他（自己提案）</label>
@@ -315,7 +321,7 @@
 
 <script>
   // ── 作品清單：照片放進 works/ 資料夾後，在這裡加一行 { src: 'works/檔名.jpg', theme: '主題' } ──
-  const THEMES = ['復古', '廢墟探勘', '獵奇', '夢核', '衝突美學', '其他'];
+  const THEMES = ['復古', '廢墟探勘', '獵奇', '奇幻', '夢核', '衝突美學', '其他'];
   const WORKS = [
   ];
 
