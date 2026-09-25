@@ -84,6 +84,12 @@
         <div class="item" data-theme="衝突美學（視覺、情緒、邏輯）"><span class="no">5.</span><span class="name">衝突美學</span><span class="tags"><span class="tag t3">視覺</span><span class="tag t3">情緒</span><span class="tag t3">邏輯</span></span></div>
         <div class="item" data-theme="其他（自己提案）"><span class="no">6.</span><span class="name">其他</span><span class="tags"><span class="tag t1">自己提案</span></span></div>
       </div>
+      <div class="group">拍攝地區</div>
+      <div class="list">
+        <div class="item" style="cursor:default"><span class="no">📍</span><span class="name">台南</span><span class="tags"><span class="tag t3">假日</span></span></div>
+        <div class="item" style="cursor:default"><span class="no">📍</span><span class="name">嘉義、雲林</span><span class="tags"><span class="tag t2">平日</span></span></div>
+        <div class="item" style="cursor:default"><span class="no">📍</span><span class="name">其他縣市</span><span class="tags"><span class="tag t1">依感興趣主題另約</span></span></div>
+      </div>
       <div class="group">服裝</div>
       <p class="hint" style="padding:6px 12px">依討論主題後選擇，有很想拍的服裝可以先在下方表單提出來。</p>
     </div>
@@ -114,9 +120,9 @@
       <div><label class="t" for="name">姓名 / 暱稱 *</label><input id="name" type="text" name="entry.1169685776" required></div>
       <div><label class="t" for="ig">IG 帳號</label><input id="ig" type="text" name="entry.775804431" placeholder="@your_ig"></div>
       <div><label class="t" for="phone">電話 *</label><input id="phone" type="tel" name="entry.119148823" required></div>
-      <div><label class="t" for="area">地區 *</label>
+      <div><label class="t" for="area">你住哪個縣市 *</label>
         <select id="area" name="entry.1516773133" required>
-          <option value="">請選擇</option><option>北部</option><option>中部</option><option>南部</option><option>東部</option><option>皆可</option>
+          <option value="">請選擇</option><option>台南</option><option>嘉義</option><option>雲林</option><option>其他縣市</option>
         </select></div>
     </div>
 
@@ -135,12 +141,12 @@
       <label><input type="checkbox" name="entry.1010272532" value="其他（自己提案）">其他（自己提案）</label>
     </div>
 
-    <label class="t">可拍時段（可複選）</label>
+    <label class="t">可配合的拍攝場次（可複選）</label>
     <div class="checks row">
-      <label><input type="checkbox" name="entry.2098647330" value="平日白天">平日白天</label>
-      <label><input type="checkbox" name="entry.2098647330" value="平日晚上">平日晚上</label>
-      <label><input type="checkbox" name="entry.2098647330" value="假日白天">假日白天</label>
-      <label><input type="checkbox" name="entry.2098647330" value="假日晚上">假日晚上</label>
+      <label><input type="checkbox" name="entry.2098647330" value="假日・台南">假日・台南</label>
+      <label><input type="checkbox" name="entry.2098647330" value="平日・嘉義">平日・嘉義</label>
+      <label><input type="checkbox" name="entry.2098647330" value="平日・雲林">平日・雲林</label>
+      <label><input type="checkbox" name="entry.2098647330" value="其他縣市（依主題另約）">其他縣市（依主題另約）</label>
     </div>
 
     <div class="row c2">
@@ -173,8 +179,8 @@
 
   // 主題清單 ⇄ 表單勾選同步
   const box = v => $$('#themeChecks input').find(i => i.value === v);
-  const sync = () => $$('.item').forEach(it => it.classList.toggle('on', box(it.dataset.theme).checked));
-  $$('.item').forEach(it => it.onclick = () => { const b = box(it.dataset.theme); b.checked = !b.checked; sync(); });
+  const sync = () => $$('.item[data-theme]').forEach(it => it.classList.toggle('on', box(it.dataset.theme).checked));
+  $$('.item[data-theme]').forEach(it => it.onclick = () => { const b = box(it.dataset.theme); b.checked = !b.checked; sync(); });
   $$('#themeChecks input').forEach(i => i.onchange = sync);
 
   f.onsubmit = async e => {
