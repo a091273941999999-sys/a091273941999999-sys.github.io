@@ -68,7 +68,7 @@
   .chip:hover { color: var(--text); border-color: var(--dim); }
   .chip.on { color: #1a1206; background: var(--amber); border-color: var(--amber); font-weight: 700; }
   .gwrap { position: relative; }
-  .gallery { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; padding-bottom: 12px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .gallery { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
   .gallery figure { flex: 0 0 auto; height: 420px; min-width: 120px; margin: 0; scroll-snap-align: start; position: relative; overflow: hidden; border-radius: 8px; cursor: zoom-in; background: var(--card); }
   .gallery img { height: 100%; width: auto; transition: transform .5s ease, filter .5s ease; }
   .gallery .more-card { flex: 0 0 220px; height: 420px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
@@ -369,6 +369,9 @@
     gallery.innerHTML = shown.map((w, i) =>
       '<figure data-i="' + i + '"><img src="' + (w.thumb || w.src) + '" alt="' + w.theme + '作品" loading="lazy"><figcaption>' + w.theme + '</figcaption></figure>').join('') +
       '<a class="more-card" href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener"><b>更多作品</b>IG @xuan_lu9 →</a>';
+    // 走馬燈：照片夠多時複製一份接在後面，捲到一半就無縫接回開頭
+    gallery.dataset.n = shown.length + 1;
+    if (shown.length > 2) gallery.innerHTML += gallery.innerHTML;
     gallery.scrollLeft = 0;
   };
   const initGallery = done => {
@@ -386,19 +389,28 @@
     }
   };
   initGallery(false);
-  $('#gPrev').onclick = () => gallery.scrollBy({ left: -gallery.clientWidth * 0.8 });
-  $('#gNext').onclick = () => gallery.scrollBy({ left: gallery.clientWidth * 0.8 });
-  // 自動輪播：每 3.5 秒往右一張，到底回到第一張；滑鼠移上去、手指碰到、放大檢視或切到別的分頁時暫停
-  let hold = false, idle = 0;
-  const step = () => {
-    const f = gallery.querySelector('figure'); if (!f) return;
-    const max = gallery.scrollWidth - gallery.clientWidth;
-    if (gallery.scrollLeft >= max - 5) gallery.scrollTo({ left: 0 }); else gallery.scrollBy({ left: f.offsetWidth + 12 });
-  };
+  $('#gPrev').onclick = () => { idle = Date.now(); gallery.scrollBy({ left: -gallery.clientWidth * 0.8, behavior: 'smooth' }); };
+  $('#gNext').onclick = () => { idle = Date.now(); gallery.scrollBy({ left: gallery.clientWidth * 0.8, behavior: 'smooth' }); };
+  // 走馬燈：一直慢慢往右滑、無限循環；滑鼠移上去、手指碰到或放大檢視時暫停
+  let hold = false, idle = 0, pos = 0, last = 0;
+  const SPEED = 40; // 每秒移動幾像素
   ['mouseenter', 'touchstart', 'focusin'].forEach(ev => gallery.parentElement.addEventListener(ev, () => { hold = true; }, { passive: true }));
   ['mouseleave', 'touchend'].forEach(ev => gallery.parentElement.addEventListener(ev, () => { hold = false; idle = Date.now(); }, { passive: true }));
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
-    setInterval(() => { if (!hold && lb.hidden && !document.hidden && !gallery.parentElement.hidden && Date.now() - idle > 4000) step(); }, 3500);
+  const marquee = t => {
+    const dt = last ? Math.min(t - last, 50) : 0; last = t;
+    const n = +gallery.dataset.n || 0, kids = gallery.children;
+    const half = kids.length > n && n ? kids[n].offsetLeft - kids[0].offsetLeft : 0;
+    if (half && !hold && lb.hidden && !gallery.parentElement.hidden && Date.now() - idle > 1500) {
+      pos += SPEED * dt / 1000;
+      if (pos >= half) pos -= half;
+      gallery.scrollLeft = pos;
+    } else {
+      pos = gallery.scrollLeft;
+      if (half && pos >= half) { pos -= half; gallery.scrollLeft = pos; }
+    }
+    requestAnimationFrame(marquee);
+  };
+  requestAnimationFrame(marquee);
   const lb = $('#lb'), lbImg = $('#lbImg');
   let cur = 0;
   const openLb = i => { cur = (i + shown.length) % shown.length; lbImg.src = shown[cur].src; lb.hidden = false; };
