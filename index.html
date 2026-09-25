@@ -161,9 +161,9 @@
       <div><label class="t" for="concept">想拍的概念</label><textarea id="concept" name="entry.1204499503" rows="3" placeholder="簡單描述你想拍的畫面、情緒或故事"></textarea></div>
       <div><label class="t" for="note">備註</label><textarea id="note" name="entry.1166445254" rows="3" placeholder="你想對我說的話"></textarea></div>
     </div>
-    <div class="row" id="photoRow" hidden><div><label class="t" for="photos">個人照片（選填，最多 3 張）</label>
+    <div class="row" id="photoRow" hidden><div><label class="t" for="photos">照片（選填，最多 10 張）</label>
       <input id="photos" type="file" accept="image/*" multiple>
-      <p class="hint" id="photoHint">正面、側面、全身照各一張最好；會自動壓縮後上傳。</p></div></div>
+      <p class="hint" id="photoHint">個人照、想拍的服裝、主題構想的參考圖都可以；會自動壓縮後上傳。</p></div></div>
     <div class="row"><div><label class="t" for="outfit">想拍的服裝</label><input id="outfit" type="text" name="entry.178669148" placeholder="服裝會依討論後的主題選擇，有很想拍的服裝可以先寫"></div></div>
 
     <div class="actions">
@@ -220,7 +220,7 @@
     if (!areaOther.hidden) fd.set('entry.1166445254', ['【住：' + areaOther.value.trim() + '】', fd.get('entry.1166445254')].filter(Boolean).join(' '));
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
     const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
-    if (photos.length > 3) { msg.textContent = '❌ 照片最多 3 張'; return; }
+    if (photos.length > 10) { msg.textContent = '❌ 照片最多 10 張'; return; }
     btn.disabled = true; msg.textContent = '送出中…';
     try {
       if (photos.length) {
