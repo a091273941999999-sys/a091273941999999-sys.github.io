@@ -57,7 +57,8 @@
 
   @media (max-width: 720px) {
     .list, .c2, .c4 { grid-template-columns: 1fr; }
-    .item .tags { display: none; }
+    .item { flex-wrap: wrap; }
+    .item .tags { margin-left: 2.1em; width: 100%; justify-content: flex-start; }
     header h1 { font-size: 18px; }
   }
 </style>
