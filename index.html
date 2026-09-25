@@ -97,6 +97,475 @@
   .item.on { border-color: var(--amber); background: linear-gradient(160deg, var(--amber-dim), var(--card) 70%); }
   .item.on .pick { background: var(--amber); border-color: var(--amber); color: #1a1206; }
   .item.on .pick::before { content: "✓"; }
+  .item.has-img { min-height: 170px; display: flex; flex-direction: column; justify-content: flex-end; border-color: rgb(255 255 255 / .08);
+    background: linear-gradient(to bottom, rgb(13 16 21 / .15), rgb(13 16 21 / .88) 75%), var(--img) center 30% / cover; }
+  .item.has-img .no { color: #d9d4cc; }
+  .item.has-img .tag { background: rgb(0 0 0 / .35); color: #e6e1d9; border-color: rgb(255 255 255 / .18); }
+  .item.has-img.on { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) inset; }
+  .chip small { margin-left: 6px; opacity: .65; font-size: 12px; }
+  .item.other { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 14px 56px 14px 18px; border-style: dashed; background: transparent; }
+  .item.other .name { margin: 0; font-size: 18px; }
+  .item.other .desc { color: var(--muted); font-size: 14px; }
+  .item.other .pick { top: 50%; transform: translateY(-50%); }
+
+  .sub-head { font-family: var(--serif); font-size: 18px; margin: 32px 0 12px; letter-spacing: 1px; }
+  .areas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .area { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .area b { font-weight: 700; }
+  .area span { font-size: 12px; color: var(--blue); background: var(--blue-dim); padding: 2px 10px; border-radius: 999px; }
+  .note { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+  .styles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .style-g { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .style-g h4 { margin: 0 0 8px; font-size: 14px; color: var(--amber); letter-spacing: 1px; }
+  .style-g .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ── 守則 ── */
+  .rules { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; counter-reset: r; }
+  .rules li { counter-increment: r; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 16px 58px; position: relative; color: #cfcac2; font-size: 15px; }
+  .rules li::before { content: counter(r, decimal-leading-zero); position: absolute; left: 18px; top: 14px; font-family: var(--serif); color: var(--amber); font-size: 20px; font-weight: 700; }
+  .rules li > b:first-child { display: block; color: var(--text); font-size: 16px; margin-bottom: 2px; }
+  .rules b { color: var(--amber); }
+
+  /* ── 表單 ── */
+  form { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; }
+  .row { display: grid; gap: 14px; margin-bottom: 16px; }
+  .c2 { grid-template-columns: repeat(2, 1fr); } .c3 { grid-template-columns: repeat(3, 1fr); }
+  label.t { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+  input[type=text], input[type=email], input[type=url], select, textarea {
+    width: 100%; padding: 11px 14px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; }
+  input::placeholder, textarea::placeholder { color: var(--dim); }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px var(--amber-dim); }
+  input[type=file] { color: var(--muted); font-family: inherit; }
+  .checks { display: flex; flex-wrap: wrap; gap: 8px; }
+  .checks label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 15px; }
+  .checks label:has(input:checked) { border-color: var(--amber); background: var(--amber-dim); }
+  input[type=checkbox] { accent-color: var(--amber); width: 16px; height: 16px; margin: 0; }
+  .hint { color: var(--dim); font-size: 13px; margin: 6px 0 0; }
+  .more { border: 1px dashed var(--line); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+  .more summary { cursor: pointer; color: var(--blue); font-weight: 700; }
+  .more[open] summary { margin-bottom: 14px; }
+  .actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .actions .agree { display: inline-flex; align-items: center; gap: 8px; }
+  .actions .agree label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .submit { background: var(--amber); color: #1a1206; border: 0; border-radius: 999px; padding: 12px 36px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-left: auto; }
+  .submit:hover { background: #f5b67a; } .submit:disabled { opacity: .6; cursor: wait; }
+  #msg { font-weight: 700; flex-basis: 100%; text-align: right; min-height: 1em; }
+
+  footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 28px 20px; text-align: center; color: var(--dim); font-size: 13px; }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 860px) {
+    .themes, .areas { grid-template-columns: repeat(2, 1fr); }
+    .rules, .styles { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 620px) {
+    .nav { padding: 10px 16px; }
+    .nav .brand small, .nav a.l.hide-sm { display: none; }
+    .hero { min-height: 340px; aspect-ratio: auto; }
+    .hero-in { padding: 20px 16px 22px; }
+    main { padding: 0 16px 32px; }
+    section { padding-top: 44px; }
+    .themes, .areas, .c2, .c3 { grid-template-columns: 1fr; }
+    .item.other { flex-wrap: wrap; gap: 4px 12px; }
+    form { padding: 20px 16px; }
+    .submit { width: 100%; margin-left: 0; }
+    #msg { text-align: left; }
+    .lb-prev, .lb-next { top: auto; bottom: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="#top">玄鹿<small>xuan_lu9 · portrait</small></a>
+  <a class="l hide-sm" href="#works">作品</a>
+  <a class="l" href="#themes">主題</a>
+  <a class="l" href="#rulesCard">守則</a>
+  <a class="l cta" href="#f">我要約拍</a>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-in">
+    <div>
+      <p class="eyebrow">Portrait · Collaboration</p>
+      <h1>合作拍攝表單填寫</h1>
+      <p class="sub"><span>#喜歡光影</span><span>#奇怪主題</span><span>#復古風</span></p>
+    </div>
+    <div class="hero-btns">
+      <a class="btn btn-amber" href="#f">我要約拍 →</a>
+      <a class="btn btn-ghost" href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">📸 @xuan_lu9</a>
+      <button type="button" class="btn btn-ghost" id="rulesBtn">🤝 拍攝守則</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 作品：照片放進雲端「主題照片」的主題資料夾就會自動出現（由 Apps Script 提供清單） -->
+  <section id="works">
+    <div class="sec-head"><span class="num">01</span><h2>作品</h2>
+      <p>點照片可以放大；更多作品在 <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">IG @xuan_lu9</a>。</p></div>
+    <div class="filters" id="filters"></div>
+    <div class="gallery" id="gallery"></div>
+    <div class="empty" id="worksEmpty"><strong>作品載入中…</strong>也可以先到 <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">IG @xuan_lu9</a> 看看最近的作品。</div>
+  </section>
+
+  <!-- 主題提案：點一下就勾選到下方表單 -->
+  <section id="themes">
+    <div class="sec-head"><span class="num">02</span><h2>主題提案</h2>
+      <p>點主題卡片就會幫你勾選到報名表。有其他想拍的也可以自己提案，更詳細的主題可以 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊我討論</a>。</p></div>
+    <div class="themes">
+      <div class="item" data-theme="復古（昭和、台味）"><span class="pick"></span><span class="no">01</span><span class="name">復古</span><span class="tags"><span class="tag">昭和</span><span class="tag">台味</span></span></div>
+      <div class="item" data-theme="廢墟探勘（新景點開發）"><span class="pick"></span><span class="no">02</span><span class="name">廢墟探勘</span><span class="tags"><span class="tag">新景點開發</span></span></div>
+      <div class="item" data-theme="獵奇（都市傳說、日本妖怪、恐怖故事）"><span class="pick"></span><span class="no">03</span><span class="name">獵奇</span><span class="tags"><span class="tag">都市傳說</span><span class="tag">日本妖怪</span><span class="tag">恐怖故事</span></span></div>
+      <div class="item" data-theme="奇幻（天使、精靈、童話）"><span class="pick"></span><span class="no">04</span><span class="name">奇幻</span><span class="tags"><span class="tag">天使 / 墮天使</span><span class="tag">精靈</span><span class="tag">童話角色</span></span></div>
+      <div class="item" data-theme="夢核（夢境、違和感、超現實）"><span class="pick"></span><span class="no">05</span><span class="name">夢核</span><span class="tags"><span class="tag">夢境</span><span class="tag">違和感</span><span class="tag">超現實</span></span></div>
+      <div class="item" data-theme="衝突美學（視覺、情緒、邏輯）"><span class="pick"></span><span class="no">06</span><span class="name">衝突美學</span><span class="tags"><span class="tag">視覺</span><span class="tag">情緒</span><span class="tag">邏輯</span></span></div>
+      <div class="item other" data-theme="其他（自己提案）"><span class="pick"></span><span class="name">其他</span><span class="desc">有自己想拍的題材？點這裡，並在下方「想拍的概念」寫給我。</span></div>
+    </div>
+
+    <h3 class="sub-head">拍攝地區</h3>
+    <div class="areas">
+      <div class="area"><b>📍 台南</b><span>假日</span></div>
+      <div class="area"><b>📍 嘉義、雲林</b><span>平日</span></div>
+      <div class="area"><b>📍 其他縣市</b><span>依感興趣主題另約</span></div>
+    </div>
+
+    <h3 class="sub-head">服裝</h3>
+    <p class="note">依討論主題後選擇，有很想拍的服裝可以先在下方表單提出來；沒想法也沒關係，我會依主題推薦。可參考的穿搭風格（可跨主題搭配，例如廢墟 × Y2K）：</p>
+    <div class="styles">
+      <div class="style-g"><h4>甜系 / 次文化</h4><div class="tags"><span class="tag">Y2K 辣妹</span><span class="tag">羅莉塔（甜美 / 哥德 / 古典）</span><span class="tag">地雷系</span><span class="tag">量產型</span><span class="tag">Kidcore</span><span class="tag">Decora</span></div></div>
+      <div class="style-g"><h4>暗黑 / 龐克</h4><div class="tags"><span class="tag">哥德</span><span class="tag">視覺系</span><span class="tag">龐克</span><span class="tag">暗黑童話</span><span class="tag">軍裝 / 制服風</span></div></div>
+      <div class="style-g"><h4>古典 / 幻想</h4><div class="tags"><span class="tag">維多利亞古典洋裝</span><span class="tag">中華風（旗袍 / 改良漢服 / 民國風）</span><span class="tag">蒸氣龐克</span><span class="tag">精靈 / 仙子系</span></div></div>
+      <div class="style-g"><h4>未來 / 實驗</h4><div class="tags"><span class="tag">賽博龐克</span><span class="tag">機能風</span><span class="tag">未來感金屬 / PVC</span><span class="tag">前衛解構</span><span class="tag">辦公室怪奇 / 演員感</span></div></div>
+    </div>
+  </section>
+
+  <section id="rulesCard">
+    <div class="sec-head"><span class="num">03</span><h2>拍攝守則</h2><p>報名前請先看過，送出時需勾選同意。</p></div>
+    <ol class="rules" id="rules">
+      <li><b>費用</b>拍攝費用、交通、餐費、場地費等，私訊詳談。</li>
+      <li><b>拍攝前確認內容</b>風格、服裝、地點、時間。</li>
+      <li><b>守時</b>遲到沒關係，但請先告知；要取消或改期，請在 <b>3 天前</b>通知。無故放鳥就直接不再合作。</li>
+      <li><b>交件</b>拍完照會先給原檔，請把想要的照片放進我建立的資料夾，減少重複挑照的時間；色調調整的時間依選照數量估算。選照數量盡量是 IG 發文 3 組（30 張最佳）；有選擇困難症可以一起討論，但基本上挑越多、交照越慢。</li>
+      <li><b>使用範圍</b>作品雙方都可以用在個人作品集與社群，<b>照片採 IG 協作方式發布，發文時請協作 @xuan_lu9</b>。</li>
+      <li><b>禁止商用</b>未經對方書面同意，不得把作品用在商業用途、廣告、販售或參賽。</li>
+      <li><b>修圖</b>色調跟修臉不限制；修圖前會先給色調樣本確認，喜歡原檔也可以直接 PO。</li>
+    </ol>
+  </section>
+
+  <!-- 欄位名稱 entry.xxx 對應 Google 表單的題目；送出的資料會進試算表「表單回覆 1」 -->
+  <section>
+    <div class="sec-head"><span class="num">04</span><h2>我要約拍</h2><p>填完送出後，我會透過 IG 或你留的聯絡方式跟你聯繫。</p></div>
+  <form id="f">
+    <input type="hidden" name="entry.928746135" id="role" value="模特兒">
+
+    <div class="row c3">
+      <div><label class="t" for="name">姓名 / 暱稱 *</label><input id="name" type="text" name="entry.1169685776" required></div>
+      <div><label class="t" for="ig">IG 帳號</label><input id="ig" type="text" name="entry.775804431" placeholder="@your_ig"></div>
+      <div><label class="t" for="area">你住哪個縣市 *</label>
+        <select id="area" name="entry.1516773133" required>
+          <option value="">請選擇</option><option>台南</option><option>嘉義</option><option>雲林</option><option>其他縣市</option>
+        </select>
+        <input id="areaOther" type="text" placeholder="請填縣市，例如：高雄" hidden style="margin-top:8px"></div>
+    </div>
+
+    <div class="row"><div><label class="t">想拍的主題 *（可複選）</label>
+    <div class="checks" id="themeChecks">
+      <label><input type="checkbox" name="entry.1010272532" value="復古（昭和、台味）">復古</label>
+      <label><input type="checkbox" name="entry.1010272532" value="廢墟探勘（新景點開發）">廢墟探勘</label>
+      <label><input type="checkbox" name="entry.1010272532" value="獵奇（都市傳說、日本妖怪、恐怖故事）">獵奇</label>
+      <label><input type="checkbox" name="entry.1010272532" value="奇幻（天使、精靈、童話）">奇幻</label>
+      <label><input type="checkbox" name="entry.1010272532" value="夢核（夢境、違和感、超現實）">夢核</label>
+      <label><input type="checkbox" name="entry.1010272532" value="衝突美學（視覺、情緒、邏輯）">衝突美學</label>
+      <label><input type="checkbox" name="entry.1010272532" value="其他（自己提案）">其他（自己提案）</label>
+    </div></div></div>
+
+    <div class="row"><div><label class="t">可配合的拍攝場次（可複選）</label>
+    <div class="checks">
+      <label><input type="checkbox" name="entry.2098647330" value="假日・台南">假日・台南</label>
+      <label><input type="checkbox" name="entry.2098647330" value="平日・嘉義">平日・嘉義</label>
+      <label><input type="checkbox" name="entry.2098647330" value="平日・雲林">平日・雲林</label>
+      <label><input type="checkbox" name="entry.2098647330" value="其他縣市（依主題另約）">其他縣市（依主題另約）</label>
+    </div></div></div>
+
+    <div class="row c2">
+      <div><label class="t" for="concept">想拍的概念</label><textarea id="concept" name="entry.1204499503" rows="3" placeholder="簡單描述你想拍的畫面、情緒或故事"></textarea></div>
+      <div><label class="t" for="note">備註</label><textarea id="note" name="entry.1166445254" rows="3" placeholder="你想對我說的話"></textarea></div>
+    </div>
+    <div class="row c2">
+      <div><label class="t" for="outfit">想拍的服裝</label><input id="outfit" type="text" name="entry.178669148" placeholder="有想拍的可以先寫；沒想法就留白，我會依主題推薦"></div>
+      <div id="photoRow"><label class="t" for="photos">照片（選填，最多 10 張）</label>
+        <input id="photos" type="file" accept="image/*" multiple>
+        <p class="hint" id="photoHint">個人照、想拍的服裝、主題構想的參考圖都可以；會自動壓縮後上傳。</p></div>
+    </div>
+
+    <details class="more">
+      <summary>＋ 選填資料（聯絡方式、Email、作品集）</summary>
+      <div class="row"><div><label class="t" for="phone">聯絡方式（電話或 LINE）</label><input id="phone" type="text" name="entry.119148823" placeholder="電話號碼或 LINE ID"></div></div>
+      <div class="row c2">
+        <div><label class="t" for="email">Email</label><input id="email" type="email" name="entry.1284457421"></div>
+        <div><label class="t" for="ref">個人照 / 作品集連結</label><input id="ref" type="url" name="entry.1672338954" placeholder="https://"></div>
+      </div>
+    </details>
+
+    <div class="actions">
+      <span class="agree"><label><input type="checkbox" name="entry.1494154193" value="同意" required>我已閱讀並同意</label><a href="#rulesCard" id="rulesLink">拍攝守則</a></span>
+      <button class="submit">送出報名</button>
+      <span id="msg" role="status"></span>
+    </div>
+  </form>
+  </section>
+</main>
+
+<footer>© 玄鹿 · <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">@xuan_lu9</a> · 喜歡光影、奇怪主題、復古風</footer>
+
+<div class="lightbox" id="lb" hidden>
+  <button class="lb-btn lb-close" id="lbClose" aria-label="關閉">✕</button>
+  <button class="lb-btn lb-prev" id="lbPrev" aria-label="上一張">‹</button>
+  <img id="lbImg" alt="">
+  <button class="lb-btn lb-next" id="lbNext" aria-label="下一張">›</button>
+</div>
+
+<script>
+  // ── 作品清單：照片放進 works/ 資料夾後，在這裡加一行 { src: 'works/檔名.jpg', theme: '主題' } ──
+  const THEMES = ['復古', '廢墟探勘', '獵奇', '奇幻', '夢核', '衝突美學', '其他'];
+  const WORKS = [
+  ];
+
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf2SdMBvLJF1a8exr1lWroJNOvx2_OxJSNjEWIhb50z-DHceA/formResponse';
+  // Apps Script（互惠攝影報名專案的 doPost）：照片存到雲端硬碟「互惠報名照片」，回傳資料夾連結
+  const UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwoXb8JYhmEDVdXHRpYbeiEr2-ffJYBI5IYwehqtf8QWVGM-ORQV53U6I7KJLfhve7QRg/exec';
+  // 縮到長邊 1600px、轉 JPEG，每張約 200–400KB
+  const toJpegBase64 = async file => {
+    const img = await createImageBitmap(file);
+    const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.82).split(',')[1];
+  };
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const f = $('#f'), msg = $('#msg'), btn = f.querySelector('.submit');
+
+  // ── 作品牆：分類篩選 + 點開放大 ──
+  const gallery = $('#gallery'), filters = $('#filters');
+  let shown = [];
+  const renderGallery = t => {
+    shown = t === '全部' ? WORKS : WORKS.filter(w => w.theme === t);
+    $$('#filters .chip').forEach(c => c.classList.toggle('on', c.dataset.t === t));
+    gallery.innerHTML = shown.map((w, i) =>
+      '<figure data-i="' + i + '"><img src="' + (w.thumb || w.src) + '" alt="' + w.theme + '作品" loading="lazy"><figcaption>' + w.theme + '</figcaption></figure>').join('');
+  };
+  const initGallery = done => {
+    const box = $('#worksEmpty');
+    if (WORKS.length) {
+      const used = THEMES.filter(t => WORKS.some(w => w.theme === t)).concat([...new Set(WORKS.map(w => w.theme))].filter(t => !THEMES.includes(t)));
+      const count = t => t === '全部' ? WORKS.length : WORKS.filter(w => w.theme === t).length;
+      filters.innerHTML = ['全部', ...used].map(t => '<button type="button" class="chip" data-t="' + t + '">' + t + '<small>' + count(t) + '</small></button>').join('');
+      filters.onclick = e => { const c = e.target.closest('.chip'); if (c) renderGallery(c.dataset.t); };
+      renderGallery('全部');
+      gallery.hidden = false; box.hidden = true;
+    } else {
+      gallery.hidden = true; box.hidden = false;
+      if (done) box.innerHTML = '<strong>作品整理中</strong>先到 <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">IG @xuan_lu9</a> 看看最近的作品吧。';
+    }
+  };
+  initGallery(false);
+  const lb = $('#lb'), lbImg = $('#lbImg');
+  let cur = 0;
+  const openLb = i => { cur = (i + shown.length) % shown.length; lbImg.src = shown[cur].src; lb.hidden = false; };
+  $('#gallery')?.addEventListener('click', e => { const fg = e.target.closest('figure'); if (fg) openLb(+fg.dataset.i); });
+  $('#lbClose').onclick = () => lb.hidden = true;
+  $('#lbPrev').onclick = () => openLb(cur - 1);
+  $('#lbNext').onclick = () => openLb(cur + 1);
+  lb.onclick = e => { if (e.target === lb) lb.hidden = true; };
+  document.addEventListener('keydown', e => {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') lb.hidden = true;
+    if (e.key === 'ArrowLeft') openLb(cur - 1);
+    if (e.key === 'ArrowRight') openLb(cur + 1);
+  });
+
+  // 拍攝守則按鈕：捲到守則
+  $('#rulesBtn').onclick = () => $('#rulesCard').scrollIntoView({ behavior: 'smooth' });
+
+  // 主題卡片 ⇄ 表單勾選同步
+  const box = v => $$('#themeChecks input').find(i => i.value === v);
+  const sync = () => $$('.item[data-theme]').forEach(it => it.classList.toggle('on', box(it.dataset.theme).checked));
+  $$('.item[data-theme]').forEach(it => it.onclick = () => { const b = box(it.dataset.theme); b.checked = !b.checked; sync(); });
+  $$('#themeChecks input').forEach(i => i.onchange = sync);
+
+  // 選「其他縣市」才顯示填寫欄；Google 表單的下拉只收固定選項，所以填的縣市寫進「備註」
+  const area = $('#area'), areaOther = $('#areaOther');
+  area.onchange = () => { areaOther.hidden = area.value !== '其他縣市'; areaOther.required = !areaOther.hidden; };
+
+  // 收起來的欄位格式錯誤時自動展開，不然看不到哪一格錯
+  f.addEventListener('invalid', e => e.target.closest('details')?.setAttribute('open', ''), true);
+
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const fd = new FormData(f);
+    // Google 表單的「電話」仍是必填題，空白會被整筆丟掉，所以補「未填」
+    if (!fd.get('entry.119148823').trim()) fd.set('entry.119148823', '未填');
+    if (!areaOther.hidden) fd.set('entry.1166445254', ['【住：' + areaOther.value.trim() + '】', fd.get('entry.1166445254')].filter(Boolean).join(' '));
+    if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
+    const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
+    if (photos.length > 10) { msg.textContent = '❌ 照片最多 10 張'; return; }
+    btn.disabled = true; msg.textContent = '送出中…';
+    try {
+      if (photos.length) {
+        msg.textContent = '照片上傳中…';
+        const files = await Promise.all(photos.map(toJpegBase64));
+        const r = await fetch(UPLOAD_URL, { method: 'POST', body: JSON.stringify({ name: fd.get('entry.1169685776'), files }) });
+        const { url } = await r.json();
+        fd.set('entry.1672338954', [fd.get('entry.1672338954'), '照片：' + url].filter(Boolean).join(' '));
+      }
+      // no-cors：Google 表單不回傳結果，只要請求送出就算成功
+      await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
+      f.reset(); sync(); area.onchange();
+      msg.textContent = '✅ 報名成功！我會透過 IG 或你留的聯絡方式跟你聯繫。';
+    } catch {
+      msg.textContent = photos.length ? '❌ 照片上傳失敗，請再試一次，或先不附照片送出' : '❌ 送出失敗，請檢查網路後再試一次';
+    }
+    btn.disabled = false;
+  };
+
+  // ── 自動更新：網站內容與照片來自 Apps Script（雲端資料夾 + 「網站內容設定」試算表）──
+  const API = 'https://script.google.com/macros/s/AKfycbwfRi5g3AEIEi8RMhJSiJ0Uh2oMK6uwkGNrBv1SD7PaBJL9fbLUspbwaH__ID3UNt-GQg/exec';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  const pic = (id, w) => 'https://lh3.googleusercontent.com/d/' + id + '=w' + w;
+  const bindThemes = () => {
+    $$('.item[data-theme]').forEach(it => it.onclick = () => { const b = box(it.dataset.theme); if (b) { b.checked = !b.checked; sync(); } });
+    $$('#themeChecks input').forEach(i => i.onchange = sync);
+  };
+  fetch(API).then(r => r.json()).then(d => {
+    const tx = d.text || {};
+    if (tx['標題']) { $('.hero h1').textContent = tx['標題']; }
+    if (tx['標語']) $('.hero .sub').innerHTML = String(tx['標語']).split(/\s+/).filter(Boolean).map(t => '<span>' + esc(t) + '</span>').join('');
+    if (tx['服裝說明']) $('#themes .note').textContent = tx['服裝說明'];
+    const first = {};
+    (d.photos || []).forEach(p => { if (!first[p.theme]) first[p.theme] = p.id; });
+    if (d.themes && d.themes.length) {
+      THEMES.splice(0, THEMES.length, ...d.themes.map(t => t.name));
+      const main = d.themes.filter(t => t.name !== '其他'), other = d.themes.find(t => t.name === '其他');
+      $('#themes .themes').innerHTML = main.map((t, i) =>
+        '<div class="item' + (first[t.name] ? ' has-img' : '') + '" data-theme="' + esc(t.value) + '"' + (first[t.name] ? ' style="--img:url(' + pic(first[t.name], 800) + ')"' : '') + '>' +
+        '<span class="pick"></span><span class="no">' + String(i + 1).padStart(2, '0') + '</span><span class="name">' + esc(t.name) + '</span>' +
+        '<span class="tags">' + t.tags.map(g => '<span class="tag">' + esc(g) + '</span>').join('') + '</span></div>').join('') +
+        (other ? '<div class="item other" data-theme="' + esc(other.value) + '"><span class="pick"></span><span class="name">其他</span><span class="desc">有自己想拍的題材？點這裡，並在下方「想拍的概念」寫給我。</span></div>' : '');
+      const picked = $$('#themeChecks input:checked').map(i => i.value);
+      $('#themeChecks').innerHTML = d.themes.map(t => '<label><input type="checkbox" name="entry.1010272532" value="' + esc(t.value) + '"' + (picked.includes(t.value) ? ' checked' : '') + '>' + esc(t.name === '其他' ? t.value : t.name) + '</label>').join('');
+      bindThemes(); sync();
+    }
+    if (d.rules && d.rules.length) $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join('');
+    if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join('');
+    if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join('');
+    WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme })));
+    initGallery(true);
+  }).catch(() => initGallery(true));
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>合作拍攝表單填寫｜玄鹿 xuan_lu9</title>
+<meta name="description" content="玄鹿 @xuan_lu9 人像攝影｜喜歡光影、奇怪主題、復古風。合作拍攝報名表單。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1015; --bg2: #12161d; --card: #171c24; --line: #262d38;
+    --text: #ece8e1; --muted: #9ba3ae; --dim: #6b7380;
+    --amber: #f0a35e; --amber-dim: rgb(240 163 94 / .14);
+    --blue: #7cc0ff; --blue-dim: rgb(124 192 255 / .14);
+    --serif: "Noto Serif TC", "Songti TC", serif;
+    --sans: "Noto Sans TC", system-ui, "Microsoft JhengHei", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  a { color: var(--amber); }
+  img { display: block; max-width: 100%; }
+
+  /* ── 導覽列 ── */
+  .nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 4px; padding: 10px 20px;
+    background: rgb(13 16 21 / .82); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .nav .brand { font-family: var(--serif); font-weight: 700; letter-spacing: 3px; color: var(--text); text-decoration: none; margin-right: auto; font-size: 17px; }
+  .nav .brand small { font-family: var(--sans); color: var(--muted); letter-spacing: 1px; font-weight: 400; font-size: 12px; margin-left: 8px; }
+  .nav a.l { color: var(--muted); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; }
+  .nav a.l:hover { color: var(--text); background: var(--card); }
+  .nav a.cta { color: #1a1206; background: var(--amber); font-weight: 700; margin-left: 6px; }
+  .nav a.cta:hover { background: #f5b67a; color: #1a1206; }
+
+  /* ── 封面：cover.jpg 放在網站根目錄 ── */
+  .hero { position: relative; aspect-ratio: 3264 / 1152; min-height: 300px; max-height: 78vh; width: 100%;
+    background: url(cover.jpg) center / cover, var(--bg2); display: flex; align-items: flex-end; }
+  .hero::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgb(13 16 21 / .05) 40%, rgb(13 16 21 / .75) 80%, var(--bg)); }
+  .hero-in { position: relative; z-index: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 24px 20px 28px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .hero .eyebrow { font-size: 12px; letter-spacing: 4px; color: var(--amber); text-transform: uppercase; margin: 0 0 6px; }
+  .hero h1 { font-family: var(--serif); font-weight: 900; font-size: clamp(30px, 5vw, 56px); line-height: 1.15; margin: 0; letter-spacing: 2px; text-shadow: 0 2px 16px rgb(0 0 0 / .5); }
+  .hero .sub { margin: 8px 0 0; color: #d9d4cc; font-size: 15px; letter-spacing: 1px; }
+  .hero .sub span { margin-right: 10px; }
+  .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 10px 20px; font-size: 15px; font-weight: 700;
+    text-decoration: none; cursor: pointer; border: 1px solid transparent; font-family: inherit; }
+  .btn-amber { background: var(--amber); color: #1a1206; }
+  .btn-amber:hover { background: #f5b67a; }
+  .btn-ghost { background: rgb(0 0 0 / .35); color: var(--text); border-color: rgb(255 255 255 / .35); backdrop-filter: blur(4px); }
+  .btn-ghost:hover { border-color: var(--text); }
+
+  /* ── 區塊 ── */
+  main { max-width: 1120px; margin: 0 auto; padding: 0 20px 40px; }
+  section { padding: 56px 0 8px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sec-head .num { font-family: var(--serif); color: var(--amber); font-size: 14px; letter-spacing: 2px; }
+  .sec-head h2 { font-family: var(--serif); font-size: clamp(24px, 3vw, 32px); margin: 0; letter-spacing: 2px; }
+  .sec-head p { margin: 0; color: var(--muted); font-size: 14px; flex-basis: 100%; }
+  .sec-head p a { font-weight: 700; }
+
+  /* ── 作品牆 ── */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .chip { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 6px 14px;
+    font-size: 14px; cursor: pointer; font-family: inherit; }
+  .chip:hover { color: var(--text); border-color: var(--dim); }
+  .chip.on { color: #1a1206; background: var(--amber); border-color: var(--amber); font-weight: 700; }
+  .gallery { columns: 3 260px; column-gap: 12px; }
+  .gallery figure { margin: 0 0 12px; break-inside: avoid; position: relative; overflow: hidden; border-radius: 8px; cursor: zoom-in; background: var(--card); }
+  .gallery img { width: 100%; height: auto; transition: transform .5s ease, filter .5s ease; }
+  .gallery figure:hover img { transform: scale(1.03); filter: brightness(1.08); }
+  .gallery figcaption { position: absolute; left: 10px; bottom: 8px; font-size: 12px; letter-spacing: 1px; color: #fff;
+    background: rgb(0 0 0 / .45); padding: 2px 10px; border-radius: 999px; opacity: 0; transition: opacity .3s; }
+  .gallery figure:hover figcaption { opacity: 1; }
+  .empty { border: 1px dashed var(--line); border-radius: 12px; padding: 48px 20px; text-align: center; color: var(--muted); background: var(--bg2); }
+  .empty strong { display: block; font-family: var(--serif); color: var(--text); font-size: 20px; margin-bottom: 6px; letter-spacing: 2px; }
+  .lightbox { position: fixed; inset: 0; z-index: 50; background: rgb(5 7 10 / .94); display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .lightbox[hidden] { display: none; }
+  .lightbox img { max-height: 90vh; max-width: 100%; border-radius: 6px; box-shadow: 0 10px 40px rgb(0 0 0 / .6); }
+  .lb-btn { position: absolute; background: rgb(255 255 255 / .08); color: #fff; border: 0; width: 44px; height: 44px; border-radius: 50%; font-size: 22px; cursor: pointer; }
+  .lb-btn:hover { background: rgb(255 255 255 / .18); }
+  .lb-close { top: 16px; right: 16px; } .lb-prev { left: 16px; } .lb-next { right: 16px; }
+
+  /* ── 主題卡片 ── */
+  .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .item { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 16px; cursor: pointer;
+    transition: border-color .2s, transform .2s, background .2s; user-select: none; }
+  .item:hover { border-color: var(--dim); transform: translateY(-2px); }
+  .item .no { font-family: var(--serif); color: var(--dim); font-size: 13px; letter-spacing: 2px; }
+  .item .name { display: block; font-family: var(--serif); font-size: 22px; font-weight: 700; margin: 2px 0 10px; letter-spacing: 1px; }
+  .item .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 12px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .item .pick { position: absolute; top: 14px; right: 14px; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--dim);
+    display: grid; place-items: center; font-size: 13px; color: transparent; }
+  .item.on { border-color: var(--amber); background: linear-gradient(160deg, var(--amber-dim), var(--card) 70%); }
+  .item.on .pick { background: var(--amber); border-color: var(--amber); color: #1a1206; }
+  .item.on .pick::before { content: "✓"; }
   .item.other { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 14px 56px 14px 18px; border-style: dashed; background: transparent; }
   .item.other .name { margin: 0; font-size: 18px; }
   .item.other .desc { color: var(--muted); font-size: 14px; }
