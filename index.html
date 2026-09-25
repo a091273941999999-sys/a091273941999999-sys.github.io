@@ -123,7 +123,8 @@
       <div><label class="t" for="area">你住哪個縣市 *</label>
         <select id="area" name="entry.1516773133" required>
           <option value="">請選擇</option><option>台南</option><option>嘉義</option><option>雲林</option><option>其他縣市</option>
-        </select></div>
+        </select>
+        <input id="areaOther" type="text" placeholder="請填縣市，例如：高雄" hidden style="margin-top:6px"></div>
     </div>
 
     <div class="row c2">
@@ -153,6 +154,9 @@
       <div><label class="t" for="concept">想拍的概念</label><textarea id="concept" name="entry.1204499503" rows="3" placeholder="簡單描述你想拍的畫面、情緒或故事"></textarea></div>
       <div><label class="t" for="note">備註</label><textarea id="note" name="entry.1166445254" rows="3" placeholder="器材、可接受尺度…"></textarea></div>
     </div>
+    <div class="row" id="photoRow" hidden><div><label class="t" for="photos">個人照片（選填，最多 3 張）</label>
+      <input id="photos" type="file" accept="image/*" multiple>
+      <p class="hint" id="photoHint">正面、側面、全身照各一張最好；會自動壓縮後上傳。</p></div></div>
     <div class="row"><div><label class="t" for="outfit">想拍的服裝</label><input id="outfit" type="text" name="entry.178669148" placeholder="服裝會依討論後的主題選擇，有很想拍的服裝可以先寫"></div></div>
 
     <div class="actions">
@@ -165,6 +169,17 @@
 
 <script>
   const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf2SdMBvLJF1a8exr1lWroJNOvx2_OxJSNjEWIhb50z-DHceA/formResponse';
+  // Apps Script（互惠攝影報名專案的 doPost）：照片存到雲端硬碟「互惠報名照片」，回傳資料夾連結
+  const UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwoXb8JYhmEDVdXHRpYbeiEr2-ffJYBI5IYwehqtf8QWVGM-ORQV53U6I7KJLfhve7QRg/exec';
+  // 縮到長邊 1600px、轉 JPEG，每張約 200–400KB
+  const toJpegBase64 = async file => {
+    const img = await createImageBitmap(file);
+    const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.82).split(',')[1];
+  };
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const f = $('#f'), msg = $('#msg'), btn = f.querySelector('.submit');
 
@@ -183,18 +198,32 @@
   $$('.item[data-theme]').forEach(it => it.onclick = () => { const b = box(it.dataset.theme); b.checked = !b.checked; sync(); });
   $$('#themeChecks input').forEach(i => i.onchange = sync);
 
+  // 選「其他縣市」才顯示填寫欄；Google 表單的下拉只收固定選項，所以填的縣市寫進「備註」
+  const area = $('#area'), areaOther = $('#areaOther');
+  area.onchange = () => { areaOther.hidden = area.value !== '其他縣市'; areaOther.required = !areaOther.hidden; };
+
   f.onsubmit = async e => {
     e.preventDefault();
     const fd = new FormData(f);
+    if (!areaOther.hidden) fd.set('entry.1166445254', ['【住：' + areaOther.value.trim() + '】', fd.get('entry.1166445254')].filter(Boolean).join(' '));
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
+    const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
+    if (photos.length > 3) { msg.textContent = '❌ 照片最多 3 張'; return; }
     btn.disabled = true; msg.textContent = '送出中…';
     try {
+      if (photos.length) {
+        msg.textContent = '照片上傳中…';
+        const files = await Promise.all(photos.map(toJpegBase64));
+        const r = await fetch(UPLOAD_URL, { method: 'POST', body: JSON.stringify({ name: fd.get('entry.1169685776'), files }) });
+        const { url } = await r.json();
+        fd.set('entry.1672338954', [fd.get('entry.1672338954'), '照片：' + url].filter(Boolean).join(' '));
+      }
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
-      f.reset(); sync();
+      f.reset(); sync(); area.onchange();
       msg.textContent = '✅ 報名成功！我們會透過 IG 或電話聯繫你媒合。';
     } catch {
-      msg.textContent = '❌ 送出失敗，請檢查網路後再試一次';
+      msg.textContent = photos.length ? '❌ 照片上傳失敗，請再試一次，或先不附照片送出' : '❌ 送出失敗，請檢查網路後再試一次';
     }
     btn.disabled = false;
   };
