@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>互惠攝影合作報名</title>
+<title>互惠模特兒招募</title>
 <style>
   :root { --brand: #1e6fd9; --brand-dark: #1557b0; --line: #e3e6ea; --muted: #6b7280; --bar: #eceff3; }
   * { box-sizing: border-box; }
@@ -12,9 +12,6 @@
   header { position: sticky; top: 0; z-index: 10; background: var(--brand); color: #fff;
     display: flex; align-items: center; gap: 14px; padding: 10px 20px; flex-wrap: wrap; }
   header h1 { margin: 0; font-size: 20px; letter-spacing: 1px; }
-  .seg { display: inline-flex; border: 1px solid #fff9; border-radius: 999px; overflow: hidden; }
-  .seg button { background: transparent; color: #fff; border: 0; padding: 6px 16px; font-size: 15px; cursor: pointer; }
-  .seg button[aria-pressed="true"] { background: #fff; color: var(--brand); font-weight: 600; }
   .hbtn { margin-left: auto; background: transparent; color: #fff; border: 1px solid #fff9; border-radius: 999px; padding: 6px 16px; font-size: 15px; cursor: pointer; text-decoration: none; }
   .hint a { color: var(--brand); font-weight: 600; }
 
@@ -67,12 +64,7 @@
 <body>
 
 <header>
-  <h1>📷 互惠攝影合作</h1>
-  <div class="seg" role="group" aria-label="身分">
-    <button type="button" data-role="模特兒" aria-pressed="true">模特兒</button>
-    <button type="button" data-role="攝影師" aria-pressed="false">攝影師</button>
-    <button type="button" data-role="妝髮/造型師" aria-pressed="false">妝髮/造型</button>
-  </div>
+  <h1>📷 互惠模特兒招募</h1>
   <a class="hbtn" href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">📸 @xuan_lu9</a>
   <button type="button" class="hbtn" id="rulesBtn" style="margin-left:0">🤝 互惠守則</button>
 </header>
@@ -115,7 +107,7 @@
 
   <!-- 欄位名稱 entry.xxx 對應 Google 表單的題目；送出的資料會進試算表「表單回覆 1」 -->
   <form id="f" class="card">
-    <h2>報名資料 <span class="hint" id="roleNow"></span></h2>
+    <h2>模特兒報名資料</h2>
     <input type="hidden" name="entry.928746135" id="role" value="模特兒">
 
     <div class="row c4">
@@ -130,7 +122,7 @@
 
     <div class="row c2">
       <div><label class="t" for="email">Email</label><input id="email" type="email" name="entry.1284457421"></div>
-      <div><label class="t" for="ref">參考圖 / 作品集連結</label><input id="ref" type="url" name="entry.1672338954" placeholder="https://"></div>
+      <div><label class="t" for="ref">個人照 / 作品集連結</label><input id="ref" type="url" name="entry.1672338954" placeholder="https://"></div>
     </div>
 
     <label class="t">想拍的主題 *（可複選）</label>
@@ -170,14 +162,6 @@
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const f = $('#f'), msg = $('#msg'), btn = f.querySelector('.submit');
 
-  // 身分切換（頁首）
-  const setRole = r => {
-    $('#role').value = r;
-    $('#roleNow').textContent = '（身分：' + r + '）';
-    $$('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.role === r));
-  };
-  $$('.seg button').forEach(b => b.onclick = () => setRole(b.dataset.role));
-  setRole('模特兒');
 
   // 卡片標題收合 / 展開
   $$('.toggle-title').forEach(h => h.onclick = () => { const t = $('#' + h.dataset.target); t.hidden = !t.hidden; });
@@ -201,8 +185,7 @@
     try {
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
-      const role = $('#role').value;
-      f.reset(); setRole(role); sync();
+      f.reset(); sync();
       msg.textContent = '✅ 報名成功！我們會透過 IG 或電話聯繫你媒合。';
     } catch {
       msg.textContent = '❌ 送出失敗，請檢查網路後再試一次';
