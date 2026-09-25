@@ -39,7 +39,7 @@
 
   form h2 { margin: 0 0 12px; font-size: 18px; }
   .row { display: grid; gap: 12px; margin-bottom: 12px; }
-  .c2 { grid-template-columns: repeat(2, 1fr); } .c4 { grid-template-columns: repeat(4, 1fr); }
+  .c2 { grid-template-columns: repeat(2, 1fr); } .c3 { grid-template-columns: repeat(3, 1fr); }
   label.t { display: block; font-size: 14px; color: #374151; margin-bottom: 4px; }
   input[type=text], input[type=tel], input[type=email], input[type=url], select, textarea {
     width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; font-family: inherit; }
@@ -57,7 +57,7 @@
   .more[open] summary { margin-bottom: 12px; }
 
   @media (max-width: 720px) {
-    .list, .c2, .c4 { grid-template-columns: 1fr; }
+    .list, .c2, .c3 { grid-template-columns: 1fr; }
     .item { flex-wrap: wrap; }
     .item .tags { margin-left: 2.1em; width: 100%; justify-content: flex-start; }
     header h1 { font-size: 18px; }
@@ -119,10 +119,9 @@
     <h2>模特兒報名資料</h2>
     <input type="hidden" name="entry.928746135" id="role" value="模特兒">
 
-    <div class="row c4">
+    <div class="row c3">
       <div><label class="t" for="name">姓名 / 暱稱 *</label><input id="name" type="text" name="entry.1169685776" required></div>
       <div><label class="t" for="ig">IG 帳號</label><input id="ig" type="text" name="entry.775804431" placeholder="@your_ig"></div>
-      <div><label class="t" for="phone">聯絡方式（電話或 LINE）</label><input id="phone" type="text" name="entry.119148823" placeholder="電話號碼或 LINE ID"></div>
       <div><label class="t" for="area">你住哪個縣市 *</label>
         <select id="area" name="entry.1516773133" required>
           <option value="">請選擇</option><option>台南</option><option>嘉義</option><option>雲林</option><option>其他縣市</option>
@@ -149,7 +148,8 @@
     </div>
 
     <details class="more">
-      <summary>＋ 選填資料（Email、作品集、照片、概念、服裝、備註）</summary>
+      <summary>＋ 選填資料（聯絡方式、Email、作品集、照片、概念、服裝、備註）</summary>
+    <div class="row"><div><label class="t" for="phone">聯絡方式（電話或 LINE）</label><input id="phone" type="text" name="entry.119148823" placeholder="電話號碼或 LINE ID"></div></div>
     <div class="row c2">
       <div><label class="t" for="email">Email</label><input id="email" type="email" name="entry.1284457421"></div>
       <div><label class="t" for="ref">個人照 / 作品集連結</label><input id="ref" type="url" name="entry.1672338954" placeholder="https://"></div>
