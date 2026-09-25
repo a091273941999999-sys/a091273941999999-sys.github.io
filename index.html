@@ -161,6 +161,13 @@
   .submit:hover { background: #f5b67a; } .submit:disabled { opacity: .6; cursor: wait; }
   #msg { font-weight: 700; flex-basis: 100%; text-align: right; min-height: 1em; }
 
+  .confirm { position: fixed; inset: 0; z-index: 60; background: rgb(5 7 10 / .8); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .confirm[hidden] { display: none; }
+  .cf-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; width: min(520px, 100%); max-height: 90vh; overflow: auto; }
+  .cf-card h3 { margin: 0 0 14px; font-family: var(--serif); font-size: 20px; letter-spacing: 1px; }
+  .cf-card dl { display: grid; grid-template-columns: 7em 1fr; gap: 8px 12px; margin: 0 0 12px; font-size: 15px; }
+  .cf-card dt { color: var(--muted); } .cf-card dd { margin: 0; word-break: break-all; }
+  .cf-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
   footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 28px 20px; text-align: center; color: var(--dim); font-size: 13px; }
   footer a { color: var(--muted); }
 
@@ -332,6 +339,15 @@
 
 <footer>© 玄鹿 · <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">@xuan_lu9</a> · 喜歡光影、奇怪主題、復古風</footer>
 
+<div class="confirm" id="cf" hidden>
+  <div class="cf-card" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
+    <h3 id="cfTitle">確認報名資料</h3>
+    <dl id="cfList"></dl>
+    <p class="hint">資料正確就按「確定送出」；要修改請按「返回修改」。</p>
+    <div class="cf-btns"><button type="button" class="btn btn-ghost" id="cfBack">返回修改</button><button type="button" class="btn btn-amber" id="cfOk">確定送出</button></div>
+  </div>
+</div>
+
 <div class="lightbox" id="lb" hidden>
   <button class="lb-btn lb-close" id="lbClose" aria-label="關閉">✕</button>
   <button class="lb-btn lb-prev" id="lbPrev" aria-label="上一張">‹</button>
@@ -442,6 +458,24 @@
   // 收起來的欄位格式錯誤時自動展開，不然看不到哪一格錯
   f.addEventListener('invalid', e => e.target.closest('details')?.setAttribute('open', ''), true);
 
+  // 送出前的確認視窗：讓報名的人再看一次重要資料
+  const confirmSend = (fd, photos) => new Promise(res => {
+    const v = k => fd.getAll(k).map(x => String(x).trim()).filter(Boolean).join('、') || '（未填）';
+    const rows = [
+      ['姓名 / 暱稱', v('entry.1169685776')], ['IG 帳號', v('entry.775804431')],
+      ['縣市', areaOther.hidden ? v('entry.1516773133') : (areaOther.value.trim() || '（未填）')],
+      ['想拍的主題', v('entry.1010272532')], ['拍攝場次', v('entry.2098647330')],
+      ['聯絡方式', fd.get('entry.119148823') === '未填' ? '（未填）' : v('entry.119148823')],
+      ['Email', v('entry.1284457421')], ['照片', photos.length ? photos.length + ' 張' : '（無）']
+    ];
+    $('#cfList').innerHTML = rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('');
+    const cf = $('#cf'); cf.hidden = false; $('#cfOk').focus();
+    const done = ok => { cf.hidden = true; res(ok); };
+    $('#cfOk').onclick = () => done(true);
+    $('#cfBack').onclick = () => done(false);
+    cf.onclick = e => { if (e.target === cf) done(false); };
+  });
+
   f.onsubmit = async e => {
     e.preventDefault();
     const fd = new FormData(f);
@@ -451,6 +485,8 @@
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
     const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
     if (photos.length > 10) { msg.textContent = '❌ 照片最多 10 張'; return; }
+    msg.textContent = '';
+    if (!(await confirmSend(fd, photos))) return;
     btn.disabled = true; msg.textContent = '送出中…';
     try {
       if (photos.length) {
@@ -463,7 +499,7 @@
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
       f.reset(); sync(); area.onchange();
-      msg.textContent = '✅ 報名成功！我會透過 IG 或你留的聯絡方式跟你聯繫。';
+      msg.textContent = '✅ 報名成功！我會透過 IG 或你留的聯絡方式跟你聯繫。填錯了沒關係，重新送出一次就好（我會以最新一筆為準），或直接私訊 IG @xuan_lu9。';
     } catch {
       msg.textContent = photos.length ? '❌ 照片上傳失敗，請再試一次，或先不附照片送出' : '❌ 送出失敗，請檢查網路後再試一次';
     }
