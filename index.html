@@ -15,7 +15,8 @@
   .seg { display: inline-flex; border: 1px solid #fff9; border-radius: 999px; overflow: hidden; }
   .seg button { background: transparent; color: #fff; border: 0; padding: 6px 16px; font-size: 15px; cursor: pointer; }
   .seg button[aria-pressed="true"] { background: #fff; color: var(--brand); font-weight: 600; }
-  .hbtn { margin-left: auto; background: transparent; color: #fff; border: 1px solid #fff9; border-radius: 999px; padding: 6px 16px; font-size: 15px; cursor: pointer; }
+  .hbtn { margin-left: auto; background: transparent; color: #fff; border: 1px solid #fff9; border-radius: 999px; padding: 6px 16px; font-size: 15px; cursor: pointer; text-decoration: none; }
+  .hint a { color: var(--brand); font-weight: 600; }
 
   main { max-width: 1064px; margin: 20px auto; padding: 0 16px; }
   .card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; background: #fff; }
@@ -72,7 +73,8 @@
     <button type="button" data-role="攝影師" aria-pressed="false">攝影師</button>
     <button type="button" data-role="妝髮/造型師" aria-pressed="false">妝髮/造型</button>
   </div>
-  <button type="button" class="hbtn" id="rulesBtn">🤝 互惠守則</button>
+  <a class="hbtn" href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">📸 @xuan_lu9</a>
+  <button type="button" class="hbtn" id="rulesBtn" style="margin-left:0">🤝 互惠守則</button>
 </header>
 
 <main>
@@ -80,7 +82,7 @@
   <section class="card">
     <h2 class="toggle-title" data-target="themes">🎞️ 主題提案 <small>（點主題直接選取；點標題收合 / 展開）</small></h2>
     <div id="themes">
-      <p class="hint">有其他想拍的主題可以先提出你的概念；沒有概念的話可以參考以下提案。更詳細的主題可以私訊我討論。</p>
+      <p class="hint">有其他想拍的主題可以先提出你的概念；沒有概念的話可以參考以下提案。更詳細的主題可以<a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊我（IG @xuan_lu9）</a>討論。</p>
       <div class="group">主題（6）</div>
       <div class="list">
         <div class="item" data-theme="復古（昭和、台味）"><span class="no">1.</span><span class="name">復古</span><span class="tags"><span class="tag t1">昭和</span><span class="tag t1">台味</span></span></div>
