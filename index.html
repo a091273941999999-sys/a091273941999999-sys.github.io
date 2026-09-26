@@ -156,6 +156,12 @@
   .styles .tag { cursor: pointer; user-select: none; transition: border-color .2s, color .2s, background .2s; }
   .styles .tag:hover { border-color: var(--dim); color: var(--text); }
   .styles .tag.on { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+  .style-other { display: block; width: 100%; margin-top: 12px; background: transparent; border: 1px dashed var(--line); border-radius: 10px; padding: 12px 16px;
+    color: var(--muted); font: inherit; font-size: 14px; text-align: left; cursor: pointer; transition: border-color .2s, color .2s; }
+  .style-other b { color: var(--text); margin-right: 8px; }
+  .style-other:hover { border-color: var(--dim); color: var(--text); }
+  .style-other.on { border-color: var(--amber); color: var(--amber); }
+  .style-other.on b { color: var(--amber); }
 
   /* ── 守則 ── */
   .rules { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; counter-reset: r; }
@@ -298,6 +304,7 @@
       <div class="style-g"><h4>古典 / 幻想</h4><div class="tags"><span class="tag">維多利亞古典洋裝</span><span class="tag">中華風（旗袍 / 改良漢服 / 民國風）</span><span class="tag">蒸氣龐克</span><span class="tag">精靈 / 仙子系</span></div></div>
       <div class="style-g"><h4>未來 / 實驗</h4><div class="tags"><span class="tag">賽博龐克</span><span class="tag">機能風</span><span class="tag">未來感金屬 / PVC</span><span class="tag">前衛解構</span><span class="tag">辦公室怪奇 / 演員感</span></div></div>
     </div>
+    <button type="button" class="style-other" id="styleOtherBtn"><b>其他</b>想拍的風格沒有列在上面？點這裡，在報名表寫給我。</button>
     <p class="hint">點風格就會幫你加到報名表的「服裝與妝髮」。</p>
   </section>
 
@@ -364,7 +371,8 @@
       <div class="row"><div><label class="t">妝髮</label>
         <div class="checks"><label><input type="checkbox" data-look="妝髮" value="可以自己化">可以自己化</label><label><input type="checkbox" data-look="妝髮" value="不太會，需要參考妝容">不太會，需要參考妝容</label><label><input type="checkbox" data-look="妝髮" value="需要推薦妝髮師">需要推薦妝髮師</label></div></div></div>
       <div class="row"><div><label class="t">想嘗試的風格（可複選）</label>
-        <div class="checks" id="styleChecks"></div></div></div>
+        <div class="checks" id="styleChecks"></div>
+        <input id="styleOther" type="text" placeholder="寫下你想拍的風格，例如：蒸汽波、復古港風" hidden style="margin-top:8px"></div></div>
       <div class="row"><div><label class="t" for="outfit">想拍的服裝</label><input id="outfit" type="text" placeholder="有想拍的可以先寫；沒想法就留白，我會依主題推薦"></div></div>
     </details>
 
@@ -572,12 +580,20 @@
   const buildStyles = () => {
     const was = $$('#styleChecks input:checked').map(i => i.value);
     const items = [...new Set($$('.styles .tag').map(t => t.textContent.trim()))];
-    $('#styleChecks').innerHTML = items.map(x => '<label><input type="checkbox" data-style value="' + esc(x) + '"' + (was.includes(x) ? ' checked' : '') + '>' + esc(x) + '</label>').join('');
+    $('#styleChecks').innerHTML = items.map(x => '<label><input type="checkbox" data-style value="' + esc(x) + '"' + (was.includes(x) ? ' checked' : '') + '>' + esc(x) + '</label>').join('') +
+      '<label><input type="checkbox" data-style value="其他"' + (was.includes('其他') ? ' checked' : '') + '>其他（自己寫）</label>';
     syncStyles();
   };
   const syncStyles = () => {
     const on = $$('#styleChecks input:checked').map(i => i.value);
     $$('.styles .tag').forEach(t => t.classList.toggle('on', on.includes(t.textContent.trim())));
+    const other = on.includes('其他');
+    $('#styleOtherBtn').classList.toggle('on', other); $('#styleOther').hidden = !other;
+  };
+  $('#styleOtherBtn').onclick = () => {
+    const b = $$('#styleChecks input').find(i => i.value === '其他'); if (!b) return;
+    b.checked = true; $('#lookBox').open = true; syncStyles();
+    $('#styleOther').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => $('#styleOther').focus({ preventScroll: true }), 400);
   };
   document.addEventListener('click', e => {
     const t = e.target.closest('.styles .tag'); if (!t) return;
@@ -587,7 +603,7 @@
   $('#styleChecks').addEventListener('change', syncStyles);
   const lookText = () => {
     const pick = k => $$('[data-look="' + k + '"]:checked').map(i => i.value).join('、');
-    const st = $$('#styleChecks input:checked').map(i => i.value).join('、'), note = $('#outfit').value.trim();
+    const st = $$('#styleChecks input:checked').map(i => i.value === '其他' && $('#styleOther').value.trim() ? '其他：' + $('#styleOther').value.trim() : i.value).join('、'), note = $('#outfit').value.trim();
     const parts = [pick('服裝') && '服裝：' + pick('服裝'), pick('妝髮') && '妝髮：' + pick('妝髮'), st && '風格：' + st].filter(Boolean);
     return parts.length ? parts.concat(note ? ['補充：' + note] : []).join('｜') : note;
   };
