@@ -189,6 +189,14 @@
   .cf-card dl { display: grid; grid-template-columns: 7em 1fr; gap: 8px 12px; margin: 0 0 12px; font-size: 15px; }
   .cf-card dt { color: var(--muted); } .cf-card dd { margin: 0; word-break: break-all; }
   .cf-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+  .timebox { margin-top: 12px; display: grid; gap: 12px; }
+  .timebox[hidden], .timebox [hidden] { display: none; }
+  .item .see { position: absolute; right: 14px; bottom: 12px; font-size: 12px; color: #e6e1d9; background: rgb(0 0 0 / .45); border: 1px solid rgb(255 255 255 / .2);
+    padding: 2px 10px; border-radius: 999px; text-decoration: none; }
+  .item .see:hover { color: var(--amber); border-color: var(--amber); }
+  .item.has-img .tags { padding-right: 64px; }
+  .igfab { display: none; }
+  #msg a { color: var(--amber); }
   footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 28px 20px; text-align: center; color: var(--dim); font-size: 13px; }
   footer a { color: var(--muted); }
 
@@ -212,6 +220,9 @@
     .gallery figure, .gallery .more-card { height: 320px; }
     .gallery .more-card { flex-basis: 160px; }
     .gnav { display: none; }
+    .igfab { display: inline-flex; align-items: center; gap: 6px; position: fixed; right: 16px; bottom: 16px; z-index: 40; background: var(--amber); color: #1a1206;
+      font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 999px; text-decoration: none; box-shadow: 0 6px 20px rgb(0 0 0 / .45); }
+    footer { padding-bottom: 80px; }
   }
 </style>
 </head>
@@ -296,7 +307,7 @@
 
   <!-- 欄位名稱 entry.xxx 對應 Google 表單的題目；送出的資料會進試算表「表單回覆 1」 -->
   <section>
-    <div class="sec-head"><span class="num">04</span><h2>我要約拍</h2><p>填完送出後，我會透過 IG 或你留的聯絡方式跟你聯繫。</p></div>
+    <div class="sec-head"><span class="num">04</span><h2>我要約拍</h2><p>填完送出就好；有想法或問題，也歡迎直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a>。</p></div>
   <form id="f">
     <input type="hidden" name="entry.928746135" id="role" value="模特兒">
 
@@ -327,6 +338,13 @@
       <label><input type="checkbox" name="entry.2098647330" value="平日・嘉義">平日・嘉義</label>
       <label><input type="checkbox" name="entry.2098647330" value="平日・雲林">平日・雲林</label>
       <label><input type="checkbox" name="entry.2098647330" value="其他縣市（依主題另約）">其他縣市（依主題另約）</label>
+    </div>
+    <div class="timebox" id="timeBox" hidden>
+      <div id="wdBox"><label class="t">平日可以的時段 *（可複選）</label>
+        <div class="checks"><label><input type="checkbox" data-wd value="早上">早上</label><label><input type="checkbox" data-wd value="下午">下午</label><label><input type="checkbox" data-wd value="傍晚">傍晚</label><label><input type="checkbox" data-wd value="晚上">晚上</label></div></div>
+      <div id="weBox"><label class="t">假日可以的日子 *（可複選）</label>
+        <div class="checks"><label><input type="checkbox" data-we value="週六">週六</label><label><input type="checkbox" data-we value="週日">週日</label></div></div>
+      <div><label class="t" for="timeNote">時間補充</label><input id="timeNote" type="text" placeholder="例如：週三 3 點後、月底比較有空"></div>
     </div></div></div>
 
     <div class="row c2">
@@ -358,6 +376,7 @@
   </section>
 </main>
 
+<a class="igfab" href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener" aria-label="IG 私訊 @xuan_lu9">💬 IG 私訊</a>
 <footer>© 玄鹿 · <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">@xuan_lu9</a> · 喜歡光影、奇怪主題、復古風</footer>
 
 <div class="confirm" id="cf" hidden>
@@ -481,6 +500,28 @@
   const area = $('#area'), areaOther = $('#areaOther');
   area.onchange = () => { areaOther.hidden = area.value !== '其他縣市'; areaOther.required = !areaOther.hidden; };
 
+  // 可拍時間：勾了平日場次問時段、勾了假日場次問哪天；其他縣市兩個都問
+  const ENTRY_TIME = 'entry.680876715';
+  const sess = () => $$('input[name="entry.2098647330"]:checked').map(i => i.value);
+  const needWd = () => sess().some(v => v.startsWith('平日') || v.startsWith('其他'));
+  const needWe = () => sess().some(v => v.startsWith('假日') || v.startsWith('其他'));
+  const onSess = () => { $('#timeBox').hidden = !sess().length; $('#wdBox').hidden = !needWd(); $('#weBox').hidden = !needWe(); };
+  $$('input[name="entry.2098647330"]').forEach(i => i.addEventListener('change', onSess));
+  const timeText = () => {
+    const wd = needWd() ? $$('[data-wd]:checked').map(i => i.value) : [], we = needWe() ? $$('[data-we]:checked').map(i => i.value) : [];
+    const note = $('#timeNote').value.trim();
+    return [wd.length && '平日：' + wd.join('、'), we.length && '假日：' + we.join('、'), note && '補充：' + note].filter(Boolean).join('｜');
+  };
+  const timeMissing = () => {
+    if (!sess().length) return '';
+    const wd = $$('[data-wd]:checked').length, we = $$('[data-we]:checked').length;
+    const onlyOther = sess().every(v => v.startsWith('其他'));
+    if (onlyOther) return wd || we || $('#timeNote').value.trim() ? '' : '請選可以拍的時段或日子';
+    if (sess().some(v => v.startsWith('平日')) && !wd) return '請選平日可以的時段';
+    if (sess().some(v => v.startsWith('假日')) && !we) return '請選假日可以的日子';
+    return '';
+  };
+
   // 收起來的欄位格式錯誤時自動展開，不然看不到哪一格錯
   f.addEventListener('invalid', e => e.target.closest('details')?.setAttribute('open', ''), true);
 
@@ -490,7 +531,7 @@
     const rows = [
       ['姓名 / 暱稱', v('entry.1169685776')], ['IG 帳號', v('entry.775804431')],
       ['縣市', areaOther.hidden ? v('entry.1516773133') : (areaOther.value.trim() || '（未填）')],
-      ['想拍的主題', v('entry.1010272532')], ['拍攝場次', v('entry.2098647330')],
+      ['想拍的主題', v('entry.1010272532')], ['拍攝場次', v('entry.2098647330')], ['可拍時間', v(ENTRY_TIME)],
       ['聯絡方式', fd.get('entry.119148823') === '未填' ? '（未填）' : v('entry.119148823')],
       ['Email', v('entry.1284457421')], ['照片', photos.length ? photos.length + ' 張' : '（無）']
     ];
@@ -509,6 +550,8 @@
     if (!fd.get('entry.119148823').trim()) fd.set('entry.119148823', '未填');
     if (!areaOther.hidden) fd.set('entry.1166445254', ['【住：' + areaOther.value.trim() + '】', fd.get('entry.1166445254')].filter(Boolean).join(' '));
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
+    const tm = timeMissing(); if (tm) { msg.textContent = '❌ ' + tm; $('#timeBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    fd.set(ENTRY_TIME, timeText());
     const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
     if (photos.length > 10) { msg.textContent = '❌ 照片最多 10 張'; return; }
     msg.textContent = '';
@@ -524,8 +567,8 @@
       }
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
-      f.reset(); sync(); area.onchange();
-      msg.textContent = '✅ 報名成功！我會透過 IG 或你留的聯絡方式跟你聯繫。填錯了沒關係，重新送出一次就好（我會以最新一筆為準），或直接私訊 IG @xuan_lu9。';
+      f.reset(); sync(); area.onchange(); onSess();
+      msg.innerHTML = '✅ 報名收到了，謝謝你！有想法、問題，或想先聊聊主題，歡迎直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a> 找我。<br><small>填錯了沒關係，重新送出一次就好。</small>';
     } catch {
       msg.textContent = photos.length ? '❌ 照片上傳失敗，請再試一次，或先不附照片送出' : '❌ 送出失敗，請檢查網路後再試一次';
     }
@@ -538,7 +581,11 @@
   const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   const pic = (id, w) => 'https://lh3.googleusercontent.com/d/' + id + '=w' + w;
   const bindThemes = () => {
-    $$('.item[data-theme]').forEach(it => it.onclick = () => { const b = box(it.dataset.theme); if (b) { b.checked = !b.checked; sync(); } });
+    $$('.item[data-theme]').forEach(it => it.onclick = e => {
+      const see = e.target.closest('[data-see]');
+      if (see) { e.preventDefault(); renderGallery(see.dataset.see); $('#works').scrollIntoView({ behavior: 'smooth' }); return; }
+      const b = box(it.dataset.theme); if (b) { b.checked = !b.checked; sync(); }
+    });
     $$('#themeChecks input').forEach(i => i.onchange = sync);
   };
   fetch(API).then(r => r.json()).then(d => {
@@ -554,7 +601,8 @@
       $('#themes .themes').innerHTML = main.map((t, i) =>
         '<div class="item' + (first[t.name] ? ' has-img' : '') + '" data-theme="' + esc(t.value) + '"' + (first[t.name] ? ' style="--img:url(' + pic(first[t.name], 800) + ')"' : '') + '>' +
         '<span class="pick"></span><span class="no">' + String(i + 1).padStart(2, '0') + '</span><span class="name">' + esc(t.name) + '</span>' +
-        '<span class="tags">' + t.tags.map(g => '<span class="tag">' + esc(g) + '</span>').join('') + '</span></div>').join('') +
+        '<span class="tags">' + t.tags.map(g => '<span class="tag">' + esc(g) + '</span>').join('') + '</span>' +
+        (first[t.name] ? '<a class="see" href="#works" data-see="' + esc(t.name) + '">看作品 →</a>' : '') + '</div>').join('') +
         (other ? '<div class="item other" data-theme="' + esc(other.value) + '"><span class="pick"></span><span class="name">其他</span><span class="desc">有自己想拍的題材？點這裡，並在下方「想拍的概念」寫給我。</span></div>' : '');
       const picked = $$('#themeChecks input:checked').map(i => i.value);
       $('#themeChecks').innerHTML = d.themes.map(t => '<label><input type="checkbox" name="entry.1010272532" value="' + esc(t.value) + '"' + (picked.includes(t.value) ? ' checked' : '') + '>' + esc(t.name === '其他' ? t.value : t.name) + '</label>').join('');
