@@ -199,8 +199,8 @@
     padding: 2px 10px; border-radius: 999px; text-decoration: none; }
   .item .see:hover { color: var(--amber); border-color: var(--amber); }
   .item.has-img .tags { padding-right: 64px; }
-  .igfab { display: none; }
   #msg a { color: var(--amber); }
+  #msg a.igdm { color: #1a1206; display: inline-block; margin: 10px 0 6px; }
   footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 28px 20px; text-align: center; color: var(--dim); font-size: 13px; }
   footer a { color: var(--muted); }
 
@@ -224,9 +224,6 @@
     .gallery figure, .gallery .more-card { height: 320px; }
     .gallery .more-card { flex-basis: 160px; }
     .gnav { display: none; }
-    .igfab { display: inline-flex; align-items: center; gap: 6px; position: fixed; right: 16px; bottom: 16px; z-index: 40; background: var(--amber); color: #1a1206;
-      font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 999px; text-decoration: none; box-shadow: 0 6px 20px rgb(0 0 0 / .45); }
-    footer { padding-bottom: 80px; }
   }
 </style>
 </head>
@@ -338,7 +335,7 @@
     </div></div></div>
 
     <div class="row"><div><label class="t">可配合的拍攝場次（可複選）</label>
-    <div class="checks">
+    <div class="checks" id="sessChecks">
       <label><input type="checkbox" name="entry.2098647330" value="假日・台南">假日・台南</label>
       <label><input type="checkbox" name="entry.2098647330" value="平日・嘉義">平日・嘉義</label>
       <label><input type="checkbox" name="entry.2098647330" value="平日・雲林">平日・雲林</label>
@@ -381,7 +378,6 @@
   </section>
 </main>
 
-<a class="igfab" href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener" aria-label="IG 私訊 @xuan_lu9">💬 IG 私訊</a>
 <footer>© 玄鹿 · <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">@xuan_lu9</a> · 喜歡光影、奇怪主題、復古風</footer>
 
 <div class="confirm" id="cf" hidden>
@@ -508,10 +504,10 @@
   // 可拍時間：勾了平日場次問時段、勾了假日場次問哪天；其他縣市兩個都問
   const ENTRY_TIME = 'entry.680876715';
   const sess = () => $$('input[name="entry.2098647330"]:checked').map(i => i.value);
-  const needWd = () => sess().some(v => v.startsWith('平日') || v.startsWith('其他'));
-  const needWe = () => sess().some(v => v.startsWith('假日') || v.startsWith('其他'));
+  const isOther = v => !v.startsWith('平日') && !v.startsWith('假日');
+  const needWd = () => sess().some(v => v.startsWith('平日') || isOther(v));
+  const needWe = () => sess().some(v => v.startsWith('假日') || isOther(v));
   const onSess = () => { $('#timeBox').hidden = !sess().length; $('#wdBox').hidden = !needWd(); $('#weBox').hidden = !needWe(); };
-  $$('input[name="entry.2098647330"]').forEach(i => i.addEventListener('change', onSess));
   // 拍攝地區卡片 ⇄ 拍攝場次勾選同步（「嘉義、雲林」會同時勾兩個）
   const areaBoxes = a => { const parts = a.querySelector('b').textContent.replace('📍', '').trim().split(/[、,，\s]+/).filter(Boolean);
     return $$('input[name="entry.2098647330"]').filter(i => parts.some(p => i.value.includes(p))); };
@@ -522,7 +518,7 @@
     const on = !bs.every(b => b.checked); bs.forEach(b => { b.checked = on; });
     onSess(); syncAreas();
   });
-  $$('input[name="entry.2098647330"]').forEach(i => i.addEventListener('change', syncAreas));
+  $('#sessChecks').addEventListener('change', () => { onSess(); syncAreas(); });
   const timeText = () => {
     const wd = needWd() ? $$('[data-wd]:checked').map(i => i.value) : [], we = needWe() ? $$('[data-we]:checked').map(i => i.value) : [];
     const note = $('#timeNote').value.trim();
@@ -531,7 +527,7 @@
   const timeMissing = () => {
     if (!sess().length) return '';
     const wd = $$('[data-wd]:checked').length, we = $$('[data-we]:checked').length;
-    const onlyOther = sess().every(v => v.startsWith('其他'));
+    const onlyOther = sess().every(isOther);
     if (onlyOther) return wd || we || $('#timeNote').value.trim() ? '' : '請選可以拍的時段或日子';
     if (sess().some(v => v.startsWith('平日')) && !wd) return '請選平日可以的時段';
     if (sess().some(v => v.startsWith('假日')) && !we) return '請選假日可以的日子';
@@ -584,7 +580,7 @@
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
       f.reset(); sync(); area.onchange(); onSess(); syncAreas();
-      msg.innerHTML = '✅ 報名收到了，謝謝你！有想法、問題，或想先聊聊主題，歡迎直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a> 找我。<br><small>填錯了沒關係，重新送出一次就好。</small>';
+      msg.innerHTML = '✅ 報名收到了，謝謝你！有想法、問題，或想先聊聊主題，歡迎直接私訊 IG 找我。<br><a class="btn btn-amber igdm" href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">💬 IG 私訊 @xuan_lu9</a><br><small>填錯了沒關係，重新送出一次就好。</small>';
     } catch {
       msg.textContent = photos.length ? '❌ 照片上傳失敗，請再試一次，或先不附照片送出' : '❌ 送出失敗，請檢查網路後再試一次';
     }
@@ -641,6 +637,11 @@
     }
     if (d.rules && d.rules.length) $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join('');
     if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join('');
+    if (d.sessions && d.sessions.length) {
+      const was = sess();
+      $('#sessChecks').innerHTML = d.sessions.map(x => '<label><input type="checkbox" name="entry.2098647330" value="' + esc(x) + '"' + (was.includes(x) ? ' checked' : '') + '>' + esc(x) + '</label>').join('');
+      onSess();
+    }
     if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join(''), syncAreas();
     WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
     initGallery(true);
