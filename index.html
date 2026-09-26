@@ -404,7 +404,7 @@
   </section>
 </main>
 
-<footer>© 玄鹿 · <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">@xuan_lu9</a> · 喜歡光影、奇怪主題、復古風</footer>
+<footer>© 玄鹿 · <a href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener">@xuan_lu9</a> · 喜歡光影、奇怪主題、復古風<br><small>本站僅記錄匿名瀏覽統計</small></footer>
 
 <div class="confirm" id="cf" hidden>
   <div class="cf-card" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
@@ -443,6 +443,36 @@
   };
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const f = $('#f'), msg = $('#msg'), btn = f.querySelector('.submit');
+
+  // ── 匿名瀏覽統計：只記「時間、事件、來源、手機或電腦」和一個隨機代號，不記 IP、不記身分 ──
+  // 網址加 ?me=1 開一次，這台裝置之後就不會被記（?me=0 取消）
+  const track = (() => {
+    let off = false, vid = Math.random().toString(36).slice(2, 10);
+    try {
+      const me = new URLSearchParams(location.search).get('me');
+      if (me === '1') localStorage.setItem('xl_notrack', '1');
+      if (me === '0') localStorage.removeItem('xl_notrack');
+      off = localStorage.getItem('xl_notrack') === '1';
+      vid = localStorage.getItem('xl_vid') || vid; localStorage.setItem('xl_vid', vid);
+    } catch {}
+    const ua = navigator.userAgent, ref = document.referrer;
+    let src = '直接開啟';
+    if (/Instagram/i.test(ua)) src = 'IG';
+    else if (/FBAN|FBAV/i.test(ua)) src = 'Facebook';
+    else if (/\bLine\//i.test(ua)) src = 'LINE';
+    else if (/Barcelona/i.test(ua) || /threads\./i.test(ref)) src = 'Threads';
+    else if (ref) { try { const h = new URL(ref).hostname.replace(/^www\./, ''); if (h !== location.hostname) src = h; } catch {} }
+    const dev = /Mobi|Android|iPhone|iPad/i.test(ua) ? '手機' : '電腦';
+    const done = new Set();
+    return e => {
+      if (off || done.has(e)) return; done.add(e);
+      const body = JSON.stringify({ track: { e, v: vid, s: src, d: dev } });
+      try { if (!(navigator.sendBeacon && navigator.sendBeacon(UPLOAD_URL, body))) fetch(UPLOAD_URL, { method: 'POST', mode: 'no-cors', body }); } catch {}
+    };
+  })();
+  track('進站');
+  f.addEventListener('input', () => track('開始填表'));
+  f.addEventListener('change', () => track('開始填表'));
 
   // ── 作品牆：分類篩選 + 點開放大 ──
   const gallery = $('#gallery'), filters = $('#filters');
@@ -498,6 +528,7 @@
   const lb = $('#lb'), lbImg = $('#lbImg');
   let cur = 0;
   const openLb = i => {
+    track('看作品');
     cur = (i + shown.length) % shown.length; const w = shown[cur];
     lbImg.src = w.src; lb.hidden = false;
     $('#lbCap').innerHTML = w.theme + (w.credit ? '　·　Model ' + w.credit.split(' ').map(h => '<a href="https://www.instagram.com/' + h + '/" target="_blank" rel="noopener">@' + h + '</a>').join('、') : '');
@@ -522,6 +553,7 @@
     rulesEl.classList.toggle('fold', !open && n > 4);
     rulesMore.hidden = n <= 4;
     rulesMore.dataset.open = open ? '1' : '';
+    if (open) track('看全部守則');
     rulesMore.textContent = open ? '收合守則 ▴' : '看全部拍攝守則 ▾';
   };
   // 按「看全部守則」展開 = 看完全部，順便幫他勾好表單最下面的同意
@@ -651,6 +683,7 @@
       }
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
+      track('送出報名');
       f.reset(); sync(); area.onchange(); onSess(); syncAreas(); syncStyles();
       msg.innerHTML = '✅ 報名收到了，謝謝你！有想法、問題，或想先聊聊主題，歡迎直接私訊 IG 找我。<br><a class="btn btn-amber igdm" href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">💬 IG 私訊 @xuan_lu9</a><br><small>填錯了沒關係，重新送出一次就好。</small>';
     } catch {
