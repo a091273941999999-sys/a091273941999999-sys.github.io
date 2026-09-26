@@ -502,7 +502,8 @@
     rulesMore.dataset.open = open ? '1' : '';
     rulesMore.textContent = open ? '收合守則 ▴' : '看全部 ' + n + ' 條守則 ▾';
   };
-  rulesMore.onclick = () => setRules(!rulesMore.dataset.open);
+  // 按「看全部守則」展開 = 看完全部，順便幫他勾好表單最下面的同意
+  rulesMore.onclick = () => { const open = !rulesMore.dataset.open; setRules(open); if (open) $('input[name="entry.1494154193"]').checked = true; };
   setRules(false);
   $('#rulesLink').addEventListener('click', () => setRules(true));
   $('#rulesBtn').onclick = () => { setRules(true); $('#rulesCard').scrollIntoView({ behavior: 'smooth' }); };
