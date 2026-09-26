@@ -142,6 +142,10 @@
   .sub-head { font-family: var(--serif); font-size: 18px; margin: 32px 0 12px; letter-spacing: 1px; }
   .areas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .area { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .area { cursor: pointer; user-select: none; transition: border-color .2s, background .2s; }
+  .area:hover { border-color: var(--dim); }
+  .area.on { border-color: var(--amber); background: linear-gradient(160deg, var(--amber-dim), var(--bg2) 70%); }
+  .area.on b::after { content: " ✓"; color: var(--amber); }
   .area b { font-weight: 700; }
   .area span { font-size: 12px; color: var(--blue); background: var(--blue-dim); padding: 2px 10px; border-radius: 999px; }
   .note { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
@@ -276,6 +280,7 @@
     </div>
 
     <h3 class="sub-head">拍攝地區</h3>
+    <p class="hint" style="margin:-4px 0 12px">點地區就會幫你勾選到報名表的拍攝場次。</p>
     <div class="areas">
       <div class="area"><b>📍 台南</b><span>假日</span></div>
       <div class="area"><b>📍 嘉義、雲林</b><span>平日</span></div>
@@ -507,6 +512,17 @@
   const needWe = () => sess().some(v => v.startsWith('假日') || v.startsWith('其他'));
   const onSess = () => { $('#timeBox').hidden = !sess().length; $('#wdBox').hidden = !needWd(); $('#weBox').hidden = !needWe(); };
   $$('input[name="entry.2098647330"]').forEach(i => i.addEventListener('change', onSess));
+  // 拍攝地區卡片 ⇄ 拍攝場次勾選同步（「嘉義、雲林」會同時勾兩個）
+  const areaBoxes = a => { const parts = a.querySelector('b').textContent.replace('📍', '').trim().split(/[、,，\s]+/).filter(Boolean);
+    return $$('input[name="entry.2098647330"]').filter(i => parts.some(p => i.value.includes(p))); };
+  const syncAreas = () => $$('.areas .area').forEach(a => { const bs = areaBoxes(a); a.classList.toggle('on', bs.length > 0 && bs.every(b => b.checked)); });
+  document.addEventListener('click', e => {
+    const a = e.target.closest('.areas .area'); if (!a) return;
+    const bs = areaBoxes(a); if (!bs.length) return;
+    const on = !bs.every(b => b.checked); bs.forEach(b => { b.checked = on; });
+    onSess(); syncAreas();
+  });
+  $$('input[name="entry.2098647330"]').forEach(i => i.addEventListener('change', syncAreas));
   const timeText = () => {
     const wd = needWd() ? $$('[data-wd]:checked').map(i => i.value) : [], we = needWe() ? $$('[data-we]:checked').map(i => i.value) : [];
     const note = $('#timeNote').value.trim();
@@ -567,7 +583,7 @@
       }
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
-      f.reset(); sync(); area.onchange(); onSess();
+      f.reset(); sync(); area.onchange(); onSess(); syncAreas();
       msg.innerHTML = '✅ 報名收到了，謝謝你！有想法、問題，或想先聊聊主題，歡迎直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a> 找我。<br><small>填錯了沒關係，重新送出一次就好。</small>';
     } catch {
       msg.textContent = photos.length ? '❌ 照片上傳失敗，請再試一次，或先不附照片送出' : '❌ 送出失敗，請檢查網路後再試一次';
@@ -625,7 +641,7 @@
     }
     if (d.rules && d.rules.length) $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join('');
     if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join('');
-    if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join('');
+    if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join(''), syncAreas();
     WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
     initGallery(true);
   }).catch(() => initGallery(true));
