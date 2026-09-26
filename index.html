@@ -405,7 +405,7 @@
     shown = t === '全部' ? WORKS : WORKS.filter(w => w.theme === t);
     $$('#filters .chip').forEach(c => c.classList.toggle('on', c.dataset.t === t));
     gallery.innerHTML = shown.map((w, i) =>
-      '<figure data-i="' + i + '"><img src="' + (w.thumb || w.src) + '" alt="' + w.theme + '作品" loading="lazy"><figcaption>' + w.theme + '</figcaption>' + (w.credit ? '<span class="credits">' + w.credit.split(' ').map(h => '<a class="credit" href="https://www.instagram.com/' + h + '/" target="_blank" rel="noopener">@' + h + '</a>').join('') + '</span>' : '') + '</figure>').join('') +
+      '<figure data-i="' + i + '"><img src="' + (w.thumb || w.src) + '" alt="' + w.theme + '作品" loading="lazy"><figcaption>' + w.theme + '</figcaption>' + (w.credit ? '<span class="credits">' + w.credit.split(' ').sort((x, y) => x.length - y.length).map(h => '<a class="credit" href="https://www.instagram.com/' + h + '/" target="_blank" rel="noopener">@' + h + '</a>').join('') + '</span>' : '') + '</figure>').join('') +
       '<a class="more-card" href="https://www.instagram.com/xuan_lu9/" target="_blank" rel="noopener"><b>更多作品</b>IG @xuan_lu9 →</a>';
     // 走馬燈：照片夠多時複製一份接在後面，捲到一半就無縫接回開頭
     gallery.dataset.n = shown.length + 1;
