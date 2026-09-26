@@ -160,6 +160,9 @@
   .rules li::before { content: counter(r, decimal-leading-zero); position: absolute; left: 18px; top: 14px; font-family: var(--serif); color: var(--amber); font-size: 20px; font-weight: 700; }
   .rules li > b:first-child { display: block; color: var(--text); font-size: 16px; margin-bottom: 2px; }
   .rules b { color: var(--amber); }
+  .rules.fold li:nth-child(n+5) { display: none; }
+  .rules-more { margin: 14px auto 0; display: flex; }
+  .rules-more[hidden] { display: none; }
 
   /* ── 表單 ── */
   form { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; }
@@ -305,6 +308,7 @@
       <li><b>禁止商用</b>未經對方書面同意，不得把作品用在商業用途、廣告、販售或參賽。</li>
       <li><b>修圖</b>色調跟修臉不限制；修圖前會先給色調樣本確認，喜歡原檔也可以直接 PO。</li>
     </ol>
+    <button type="button" class="btn btn-ghost rules-more" id="rulesMore" hidden></button>
   </section>
 
   <!-- 欄位名稱 entry.xxx 對應 Google 表單的題目；送出的資料會進試算表「表單回覆 1」 -->
@@ -370,7 +374,7 @@
     </details>
 
     <div class="actions">
-      <span class="agree"><label><input type="checkbox" name="entry.1494154193" value="同意" required>我已閱讀並同意</label><a href="#rulesCard" id="rulesLink">拍攝守則</a></span>
+      <span class="agree"><label><input type="checkbox" name="entry.1494154193" value="同意" required>我已看完</label><a href="#rulesCard" id="rulesLink">全部拍攝守則</a></span>
       <button class="submit">送出報名</button>
       <span id="msg" role="status"></span>
     </div>
@@ -489,7 +493,19 @@
   });
 
   // 拍攝守則按鈕：捲到守則
-  $('#rulesBtn').onclick = () => $('#rulesCard').scrollIntoView({ behavior: 'smooth' });
+  // 守則預設只顯示前 4 條，其餘收合；從「拍攝守則」按鈕或表單的同意連結進來會全部展開
+  const rulesEl = $('#rules'), rulesMore = $('#rulesMore');
+  const setRules = open => {
+    const n = rulesEl.children.length;
+    rulesEl.classList.toggle('fold', !open && n > 4);
+    rulesMore.hidden = n <= 4;
+    rulesMore.dataset.open = open ? '1' : '';
+    rulesMore.textContent = open ? '收合守則 ▴' : '看全部 ' + n + ' 條守則 ▾';
+  };
+  rulesMore.onclick = () => setRules(!rulesMore.dataset.open);
+  setRules(false);
+  $('#rulesLink').addEventListener('click', () => setRules(true));
+  $('#rulesBtn').onclick = () => { setRules(true); $('#rulesCard').scrollIntoView({ behavior: 'smooth' }); };
 
   // 主題卡片 ⇄ 表單勾選同步
   const box = v => $$('#themeChecks input').find(i => i.value === v);
@@ -635,7 +651,7 @@
         });
       }, 5000);
     }
-    if (d.rules && d.rules.length) $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join('');
+    if (d.rules && d.rules.length) { $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join(''); setRules(!!rulesMore.dataset.open); }
     if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join('');
     if (d.sessions && d.sessions.length) {
       const was = sess();
