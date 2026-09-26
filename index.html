@@ -153,6 +153,9 @@
   .style-g { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
   .style-g h4 { margin: 0 0 8px; font-size: 14px; color: var(--amber); letter-spacing: 1px; }
   .style-g .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .styles .tag { cursor: pointer; user-select: none; transition: border-color .2s, color .2s, background .2s; }
+  .styles .tag:hover { border-color: var(--dim); color: var(--text); }
+  .styles .tag.on { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
 
   /* ── 守則 ── */
   .rules { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; counter-reset: r; }
@@ -295,6 +298,7 @@
       <div class="style-g"><h4>古典 / 幻想</h4><div class="tags"><span class="tag">維多利亞古典洋裝</span><span class="tag">中華風（旗袍 / 改良漢服 / 民國風）</span><span class="tag">蒸氣龐克</span><span class="tag">精靈 / 仙子系</span></div></div>
       <div class="style-g"><h4>未來 / 實驗</h4><div class="tags"><span class="tag">賽博龐克</span><span class="tag">機能風</span><span class="tag">未來感金屬 / PVC</span><span class="tag">前衛解構</span><span class="tag">辦公室怪奇 / 演員感</span></div></div>
     </div>
+    <p class="hint">點風格就會幫你加到報名表的「服裝與妝髮」。</p>
   </section>
 
   <section id="rulesCard">
@@ -343,7 +347,7 @@
       <label><input type="checkbox" name="entry.2098647330" value="假日・台南">假日・台南</label>
       <label><input type="checkbox" name="entry.2098647330" value="平日・嘉義">平日・嘉義</label>
       <label><input type="checkbox" name="entry.2098647330" value="平日・雲林">平日・雲林</label>
-      <label><input type="checkbox" name="entry.2098647330" value="其他縣市（依主題另約）">其他縣市（依主題另約）</label>
+      <label><input type="checkbox" name="entry.2098647330" value="其他縣市（依感興趣主題另約）">其他縣市（依感興趣主題另約）</label>
     </div>
     <div class="timebox" id="timeBox" hidden>
       <div id="wdBox"><label class="t">平日可以的時段 *（可複選）</label>
@@ -353,12 +357,22 @@
       <div><label class="t" for="timeNote">時間補充</label><input id="timeNote" type="text" placeholder="例如：週三 3 點後、月底比較有空"></div>
     </div></div></div>
 
+    <details class="more" id="lookBox">
+      <summary>＋ 服裝與妝髮（不確定可以跳過）</summary>
+      <div class="row"><div><label class="t">服裝</label>
+        <div class="checks"><label><input type="checkbox" data-look="服裝" value="我自己準備">我自己準備</label><label><input type="checkbox" data-look="服裝" value="需要依主題推薦">需要依主題推薦</label></div></div></div>
+      <div class="row"><div><label class="t">妝髮</label>
+        <div class="checks"><label><input type="checkbox" data-look="妝髮" value="可以自己化">可以自己化</label><label><input type="checkbox" data-look="妝髮" value="不太會，需要參考妝容">不太會，需要參考妝容</label><label><input type="checkbox" data-look="妝髮" value="需要推薦妝髮師">需要推薦妝髮師</label></div></div></div>
+      <div class="row"><div><label class="t">想嘗試的風格（可複選）</label>
+        <div class="checks" id="styleChecks"></div></div></div>
+      <div class="row"><div><label class="t" for="outfit">想拍的服裝</label><input id="outfit" type="text" placeholder="有想拍的可以先寫；沒想法就留白，我會依主題推薦"></div></div>
+    </details>
+
     <div class="row c2">
       <div><label class="t" for="concept">想拍的概念</label><textarea id="concept" name="entry.1204499503" rows="3" placeholder="簡單描述你想拍的畫面、情緒或故事"></textarea></div>
       <div><label class="t" for="note">備註</label><textarea id="note" name="entry.1166445254" rows="3" placeholder="你想對我說的話"></textarea></div>
     </div>
-    <div class="row c2">
-      <div><label class="t" for="outfit">想拍的服裝</label><input id="outfit" type="text" name="entry.178669148" placeholder="有想拍的可以先寫；沒想法就留白，我會依主題推薦"></div>
+    <div class="row">
       <div id="photoRow"><label class="t" for="photos">照片（選填，最多 10 張）</label>
         <input id="photos" type="file" accept="image/*" multiple>
         <p class="hint" id="photoHint">個人照、想拍的服裝、主題構想的參考圖都可以；會自動壓縮後上傳。</p></div>
@@ -554,6 +568,30 @@
   // 收起來的欄位格式錯誤時自動展開，不然看不到哪一格錯
   f.addEventListener('invalid', e => e.target.closest('details')?.setAttribute('open', ''), true);
 
+  // 服裝與妝髮：風格選項 = 上面「服裝」區的風格標籤；兩邊點哪個都會同步
+  const buildStyles = () => {
+    const was = $$('#styleChecks input:checked').map(i => i.value);
+    const items = [...new Set($$('.styles .tag').map(t => t.textContent.trim()))];
+    $('#styleChecks').innerHTML = items.map(x => '<label><input type="checkbox" data-style value="' + esc(x) + '"' + (was.includes(x) ? ' checked' : '') + '>' + esc(x) + '</label>').join('');
+    syncStyles();
+  };
+  const syncStyles = () => {
+    const on = $$('#styleChecks input:checked').map(i => i.value);
+    $$('.styles .tag').forEach(t => t.classList.toggle('on', on.includes(t.textContent.trim())));
+  };
+  document.addEventListener('click', e => {
+    const t = e.target.closest('.styles .tag'); if (!t) return;
+    const b = $$('#styleChecks input').find(i => i.value === t.textContent.trim()); if (!b) return;
+    b.checked = !b.checked; $('#lookBox').open = true; syncStyles();
+  });
+  $('#styleChecks').addEventListener('change', syncStyles);
+  const lookText = () => {
+    const pick = k => $$('[data-look="' + k + '"]:checked').map(i => i.value).join('、');
+    const st = $$('#styleChecks input:checked').map(i => i.value).join('、'), note = $('#outfit').value.trim();
+    const parts = [pick('服裝') && '服裝：' + pick('服裝'), pick('妝髮') && '妝髮：' + pick('妝髮'), st && '風格：' + st].filter(Boolean);
+    return parts.length ? parts.concat(note ? ['補充：' + note] : []).join('｜') : note;
+  };
+
   // 送出前的確認視窗：讓報名的人再看一次重要資料
   const confirmSend = (fd, photos) => new Promise(res => {
     const v = k => fd.getAll(k).map(x => String(x).trim()).filter(Boolean).join('、') || '（未填）';
@@ -562,7 +600,7 @@
       ['縣市', areaOther.hidden ? v('entry.1516773133') : (areaOther.value.trim() || '（未填）')],
       ['想拍的主題', v('entry.1010272532')], ['拍攝場次', v('entry.2098647330')], ['可拍時間', v(ENTRY_TIME)],
       ['聯絡方式', fd.get('entry.119148823') === '未填' ? '（未填）' : v('entry.119148823')],
-      ['Email', v('entry.1284457421')], ['照片', photos.length ? photos.length + ' 張' : '（無）']
+      ['服裝與妝髮', v('entry.178669148')], ['Email', v('entry.1284457421')], ['照片', photos.length ? photos.length + ' 張' : '（無）']
     ];
     $('#cfList').innerHTML = rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('');
     const cf = $('#cf'); cf.hidden = false; $('#cfOk').focus();
@@ -581,6 +619,7 @@
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
     const tm = timeMissing(); if (tm) { msg.textContent = '❌ ' + tm; $('#timeBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     fd.set(ENTRY_TIME, timeText());
+    fd.set('entry.178669148', lookText());
     const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
     if (photos.length > 10) { msg.textContent = '❌ 照片最多 10 張'; return; }
     msg.textContent = '';
@@ -596,7 +635,7 @@
       }
       // no-cors：Google 表單不回傳結果，只要請求送出就算成功
       await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(fd) });
-      f.reset(); sync(); area.onchange(); onSess(); syncAreas();
+      f.reset(); sync(); area.onchange(); onSess(); syncAreas(); syncStyles();
       msg.innerHTML = '✅ 報名收到了，謝謝你！有想法、問題，或想先聊聊主題，歡迎直接私訊 IG 找我。<br><a class="btn btn-amber igdm" href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">💬 IG 私訊 @xuan_lu9</a><br><small>填錯了沒關係，重新送出一次就好。</small>';
     } catch {
       msg.textContent = photos.length ? '❌ 照片上傳失敗，請再試一次，或先不附照片送出' : '❌ 送出失敗，請檢查網路後再試一次';
@@ -608,6 +647,7 @@
   const API = 'https://script.google.com/macros/s/AKfycbwfRi5g3AEIEi8RMhJSiJ0Uh2oMK6uwkGNrBv1SD7PaBJL9fbLUspbwaH__ID3UNt-GQg/exec';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  buildStyles();
   const pic = (id, w) => 'https://lh3.googleusercontent.com/d/' + id + '=w' + w;
   const bindThemes = () => {
     $$('.item[data-theme]').forEach(it => it.onclick = e => {
@@ -653,7 +693,7 @@
       }, 5000);
     }
     if (d.rules && d.rules.length) { $('#rules').innerHTML = d.rules.map(r => '<li><b>' + esc(r.title) + '</b>' + md(r.text) + '</li>').join(''); setRules(!!rulesMore.dataset.open); }
-    if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join('');
+    if (d.styles && d.styles.length) $('.styles').innerHTML = d.styles.map(s => '<div class="style-g"><h4>' + esc(s.group) + '</h4><div class="tags">' + s.items.map(x => '<span class="tag">' + esc(x) + '</span>').join('') + '</div></div>').join(''), buildStyles();
     if (d.sessions && d.sessions.length) {
       const was = sess();
       $('#sessChecks').innerHTML = d.sessions.map(x => '<label><input type="checkbox" name="entry.2098647330" value="' + esc(x) + '"' + (was.includes(x) ? ' checked' : '') + '>' + esc(x) + '</label>').join('');
