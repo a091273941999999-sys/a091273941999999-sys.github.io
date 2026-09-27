@@ -62,7 +62,7 @@
   .dchip:hover { background: var(--amber-dim); }
   .dchip.full, .checks label.full { border-color: var(--line); color: var(--dim); cursor: not-allowed; background: transparent; text-decoration: line-through; }
   .dchip.full:hover { background: transparent; }
-  .datebar .dhint { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .datebar .dhint { color: var(--muted); font-size: 13px; }
   .dchip { white-space: nowrap; }
   .cal { max-width: 420px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
   .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -85,7 +85,11 @@
   .datebar .dhint a { color: var(--amber); }
   .adm { margin: 20px auto 0; max-width: 1080px; padding: 16px; border: 1px dashed var(--amber); border-radius: 12px; background: var(--card); }
   .adm[hidden] { display: none; }
-  .adm h3 { margin: 0 0 4px; font-size: 17px; color: var(--amber); }
+  .adm h3 { margin: 0; font-size: 17px; color: var(--amber); }
+  .adm-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .adm-toggle { background: transparent; border: 1px solid var(--amber); color: var(--amber); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  .adm.closed .adm-body { display: none; }
+  .adm-body { margin-top: 6px; }
   .adm-cals { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 12px; }
   .adm-cals .cal { max-width: none; }
   .cal-d.adm-d { cursor: pointer; color: var(--muted); border-color: var(--line); }
@@ -310,13 +314,15 @@
 
 <main>
   <div class="adm" id="adm" hidden>
-    <h3>🔧 管理開放日期（只有你看得到）</h3>
+    <div class="adm-top"><h3>🔧 管理開放日期 <small style="font-size:12px;color:var(--muted);font-weight:400">只有你看得到</small></h3><button type="button" class="adm-toggle" id="admToggle">收合 ▴</button></div>
+    <div class="adm-body">
     <p class="hint" style="margin:0">點日期切換：未開放 → <b style="color:var(--amber)">開放</b> → 已約 → 未開放。改完按「儲存」，網站約 1–2 分鐘內更新。</p>
     <div class="adm-cals" id="admCals"></div>
     <div id="admList"></div>
     <div class="adm-bar"><button type="button" class="btn btn-amber" id="admSave">儲存</button><span id="admMsg" class="hint" style="margin:0"></span></div>
+    </div>
   </div>
-  <div class="datebar" id="dateBar" hidden><b>📅 假日開放日期</b><div class="dchips" id="dateBarChips"></div><span class="dhint">點日期直接預約 →｜平日請 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊詳談</a></span></div>
+  <div class="datebar" id="dateBar" hidden><b>📅 假日開放日期</b><div class="dchips" id="dateBarChips"></div><span class="dhint">點日期直接預約 →｜不確定就先填寫表單｜平日請 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊詳談</a></span></div>
   <!-- 作品：照片放進雲端「主題照片」的主題資料夾就會自動出現（由 Apps Script 提供清單） -->
   <section id="works">
     <div class="sec-head"><span class="num">01</span><h2>作品</h2>
@@ -406,7 +412,7 @@
       <p id="datePickedText"></p>
       <div id="dateInputs" hidden></div>
       <div class="checks" id="dateChecks" style="margin-top:10px"></div>
-      <p class="hint">點橘色的日期就能選；選了開放日期，下面就不用再填時段。<br><b style="color:var(--text)">平日需私訊詳談</b>：請直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a>。</p></div></div>
+      <p class="hint">點橘色的日期就能選；選了開放日期，下面就不用再填時段。<b style="color:var(--text)">還不確定日期也沒關係，先填寫表單</b>，再一起討論。<br><b style="color:var(--text)">平日需私訊詳談</b>：請直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a>。</p></div></div>
 
     <div class="row"><div><label class="t">可配合的拍攝場次（可複選）</label>
     <div class="checks" id="sessChecks">
@@ -664,7 +670,7 @@
     $('#dateBar').hidden = $('#dateRow').hidden = !items.length;
     $('#dateBarChips').innerHTML = items.map(x => '<button type="button" class="dchip' + (x.full ? ' full' : '') + '" data-pick="' + esc(x.label) + '"' + (x.full ? ' disabled' : '') + '>' + esc(x.label) + (x.full ? '・已約滿' : '') + '</button>').join('');
     $('#dateInputs').innerHTML = items.filter(x => !x.full).map(x => '<input type="checkbox" data-date value="' + esc(x.label) + '"' + (was.includes(x.label) ? ' checked' : '') + '>').join('');
-    $('#dateChecks').innerHTML = items.length ? '<label><input type="checkbox" id="dateNone"' + (none ? ' checked' : '') + '>以上日期都不行／想約平日</label>' : '';
+    $('#dateChecks').innerHTML = items.length ? '<label><input type="checkbox" id="dateNone"' + (none ? ' checked' : '') + '>還不確定／以上日期都不行／想約平日</label>' : '';
     calItems = items; renderCal(); onSess();
   };
   // 月曆：只有開放日期能點；多個月份時可以左右切換
@@ -867,7 +873,13 @@
   const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   buildStyles();
   const DEMO_DATES = [{ date: '2026-10-10', note: '台南', status: '開放' }, { date: '2026-10-17', note: '台南', status: '開放' }, { date: '2026-10-24', note: '台南・下午', status: '已約' }, { date: '2026-11-07', note: '台南', status: '開放' }];
-  if (ADMIN) { $('#adm').hidden = false; renderAdmin(); }
+  if (ADMIN) {
+    $('#adm').hidden = false; renderAdmin();
+    const setAdm = open => { $('#adm').classList.toggle('closed', !open); $('#admToggle').textContent = open ? '收合 ▴' : '展開 ▾'; try { localStorage.setItem('xl_adm_open', open ? '1' : '0'); } catch {} };
+    let admOpen = true; try { admOpen = localStorage.getItem('xl_adm_open') !== '0'; } catch {}
+    setAdm(admOpen);
+    $('#admToggle').onclick = () => setAdm($('#adm').classList.contains('closed'));
+  }
   const pic = (id, w) => 'https://lh3.googleusercontent.com/d/' + id + '=w' + w;
   const bindThemes = () => {
     $$('.item[data-theme]').forEach(it => it.onclick = e => {
