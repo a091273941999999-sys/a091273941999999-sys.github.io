@@ -78,7 +78,9 @@
   .cal-d.open:hover { background: var(--amber-dim); }
   .cal-d.on { background: var(--amber); color: #1a1206; }
   .cal-d.full { color: var(--dim); opacity: .55; text-decoration: line-through; }
-  #datePickedText { margin: 8px 0 0; font-size: 14px; color: var(--amber); }
+  #datePickedText { margin: 0 0 8px; font-size: 14px; color: var(--amber); }
+  .datebox { margin-bottom: 10px; }
+  .datebox[open] summary { margin-bottom: 12px; }
   #datePickedText:empty { display: none; }
   .cal-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: var(--muted); }
   .cal-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
@@ -253,7 +255,7 @@
   .cf-card dl { display: grid; grid-template-columns: 7em 1fr; gap: 8px 12px; margin: 0 0 12px; font-size: 15px; }
   .cf-card dt { color: var(--muted); } .cf-card dd { margin: 0; word-break: break-all; }
   .cf-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
-  .timebox { margin-top: 12px; display: grid; gap: 12px; }
+  .timebox { margin: 0 0 16px; display: grid; gap: 12px; }
   .timebox[hidden], .timebox [hidden] { display: none; }
   .item .see { position: absolute; right: 14px; bottom: 12px; font-size: 12px; color: #e6e1d9; background: rgb(0 0 0 / .45); border: 1px solid rgb(255 255 255 / .2);
     padding: 2px 10px; border-radius: 999px; text-decoration: none; }
@@ -407,13 +409,6 @@
       <label><input type="checkbox" name="entry.1010272532" value="其他（自己提案）">其他（自己提案）</label>
     </div></div></div>
 
-    <div class="row" id="dateRow" hidden><div><label class="t">假日開放日期（可複選）</label>
-      <div class="cal" id="dateCal"></div>
-      <p id="datePickedText"></p>
-      <div id="dateInputs" hidden></div>
-      <div class="checks" id="dateChecks" style="margin-top:10px"></div>
-      <p class="hint">點橘色的日期就能選；選了開放日期，下面就不用再填時段。<b style="color:var(--text)">還不確定日期也沒關係，先填寫表單</b>，再一起討論。<br><b style="color:var(--text)">平日需私訊詳談</b>：請直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a>。</p></div></div>
-
     <div class="row"><div><label class="t">可配合的拍攝場次（可複選）</label>
     <div class="checks" id="sessChecks">
       <label><input type="checkbox" name="entry.2098647330" value="假日・台南">假日・台南</label>
@@ -421,13 +416,25 @@
       <label><input type="checkbox" name="entry.2098647330" value="平日・雲林">平日・雲林</label>
       <label><input type="checkbox" name="entry.2098647330" value="其他縣市（依感興趣主題另約）">其他縣市（依感興趣主題另約）</label>
     </div>
+    </div></div>
+
+    <div class="row" id="dateRow" hidden><div>
+      <details class="more datebox" id="dateBox">
+        <summary>📅 假日開放日期（點開看月曆、選日期）</summary>
+        <div class="cal" id="dateCal"></div>
+        <div id="dateInputs" hidden></div>
+      </details>
+      <p id="datePickedText"></p>
+      <div class="checks" id="dateChecks"></div>
+      <p class="hint">選了開放日期，下面就不用再填時段。<b style="color:var(--text)">還不確定日期也沒關係，先填寫表單</b>，再一起討論。<br><b style="color:var(--text)">平日需私訊詳談</b>：請直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a>。</p></div></div>
+
     <div class="timebox" id="timeBox" hidden>
       <div id="wdBox"><label class="t">平日可以的時段 *（可複選）</label>
         <div class="checks"><label><input type="checkbox" data-wd value="早上">早上</label><label><input type="checkbox" data-wd value="下午">下午</label><label><input type="checkbox" data-wd value="傍晚">傍晚</label><label><input type="checkbox" data-wd value="晚上">晚上</label></div></div>
       <div id="weBox"><label class="t">假日可以的日子 *（可複選）</label>
         <div class="checks"><label><input type="checkbox" data-we value="週六">週六</label><label><input type="checkbox" data-we value="週日">週日</label></div></div>
       <div><label class="t" for="timeNote">時間補充</label><input id="timeNote" type="text" placeholder="例如：週三 3 點後、月底比較有空"></div>
-    </div></div></div>
+    </div>
 
     <details class="more" id="lookBox">
       <summary>＋ 服裝與妝髮（不確定可以跳過）</summary>
@@ -759,7 +766,7 @@
   });
   $('#dateBar').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b || b.disabled) return;
-    pickDate(b.dataset.pick, true);
+    pickDate(b.dataset.pick, true); $('#dateBox').open = true;
     $('#dateRow').scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
   const timeText = () => {
@@ -840,7 +847,7 @@
     if (!fd.get('entry.119148823').trim()) fd.set('entry.119148823', '未填');
     if (!areaOther.hidden) fd.set('entry.1166445254', ['【住：' + areaOther.value.trim() + '】', fd.get('entry.1166445254')].filter(Boolean).join(' '));
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
-    const tm = timeMissing(); if (tm) { msg.textContent = '❌ ' + tm; ($('#dateRow').hidden ? $('#timeBox') : $('#dateRow')).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    const tm = timeMissing(); if (tm) { msg.textContent = '❌ ' + tm; ($('#dateRow').hidden ? $('#timeBox') : ($('#dateBox').open = true, $('#dateRow'))).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     fd.set(ENTRY_TIME, timeText());
     fd.set('entry.178669148', lookText());
     const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
