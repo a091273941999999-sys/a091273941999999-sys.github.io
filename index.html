@@ -83,6 +83,19 @@
   .cal-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: var(--muted); }
   .cal-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
   .datebar .dhint a { color: var(--amber); }
+  .adm { margin: 20px auto 0; max-width: 1080px; padding: 16px; border: 1px dashed var(--amber); border-radius: 12px; background: var(--card); }
+  .adm[hidden] { display: none; }
+  .adm h3 { margin: 0 0 4px; font-size: 17px; color: var(--amber); }
+  .adm-cals { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 12px; }
+  .adm-cals .cal { max-width: none; }
+  .cal-d.adm-d { cursor: pointer; color: var(--muted); border-color: var(--line); }
+  .cal-d.adm-d.we { color: var(--text); }
+  .cal-d.adm-d.full { text-decoration: none; opacity: 1; background: var(--line); color: var(--muted); }
+  .adm-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+  .adm-row span { white-space: nowrap; min-width: 128px; font-size: 14px; }
+  .adm-row input { flex: 1; min-width: 0; padding: 8px 12px; }
+  @media (max-width: 620px) { .adm { margin: 16px 0 0; } .adm-row { flex-wrap: wrap; gap: 4px; } .adm-row span { min-width: 0; } .adm-row input { flex-basis: 100%; } }
+  .adm-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
   @media (max-width: 620px) { .datebar { margin: 16px 0 0; } .datebar > b, .datebar .dhint { flex-basis: 100%; } }
   .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 10px 20px; font-size: 15px; font-weight: 700;
     text-decoration: none; cursor: pointer; border: 1px solid transparent; font-family: inherit; }
@@ -296,6 +309,13 @@
 </header>
 
 <main>
+  <div class="adm" id="adm" hidden>
+    <h3>🔧 管理開放日期（只有你看得到）</h3>
+    <p class="hint" style="margin:0">點日期切換：未開放 → <b style="color:var(--amber)">開放</b> → 已約 → 未開放。改完按「儲存」，網站約 1–2 分鐘內更新。</p>
+    <div class="adm-cals" id="admCals"></div>
+    <div id="admList"></div>
+    <div class="adm-bar"><button type="button" class="btn btn-amber" id="admSave">儲存</button><span id="admMsg" class="hint" style="margin:0"></span></div>
+  </div>
   <div class="datebar" id="dateBar" hidden><b>📅 假日開放日期</b><div class="dchips" id="dateBarChips"></div><span class="dhint">點日期直接預約 →｜平日請 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊詳談</a></span></div>
   <!-- 作品：照片放進雲端「主題照片」的主題資料夾就會自動出現（由 Apps Script 提供清單） -->
   <section id="works">
@@ -491,7 +511,7 @@
       const me = new URLSearchParams(location.search).get('me');
       if (me === '1') localStorage.setItem('xl_notrack', '1');
       if (me === '0') localStorage.removeItem('xl_notrack');
-      off = localStorage.getItem('xl_notrack') === '1';
+      off = localStorage.getItem('xl_notrack') === '1' || new URLSearchParams(location.search).has('admin');
       vid = localStorage.getItem('xl_vid') || vid; localStorage.setItem('xl_vid', vid);
     } catch {}
     const ua = navigator.userAgent, ref = document.referrer;
@@ -678,6 +698,50 @@
     const it = calItems.find(x => x.label === label); if (it) calMonth = it.t.getFullYear() * 12 + it.t.getMonth();
     renderCal(); onSess();
   };
+  // ── 管理開放日期（網址帶 ?admin=密碼 才會出現）──
+  const ADMIN = new URLSearchParams(location.search).get('admin');
+  const DATES_LIVE = false; // 正式開放給所有訪客前先維持 false
+  const adm = {};
+  const ymd = dt => dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+  const keyDate = k => new Date(k.slice(0, 4), k.slice(5, 7) - 1, +k.slice(8, 10));
+  const renderAdmin = () => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const W = '日一二三四五六';
+    let h = '';
+    for (let k = 0; k < 3; k++) {
+      const first = new Date(today.getFullYear(), today.getMonth() + k, 1), y = first.getFullYear(), mo = first.getMonth(), days = new Date(y, mo + 1, 0).getDate();
+      h += '<div class="cal"><div class="cal-head"><b>' + y + ' 年 ' + (mo + 1) + ' 月</b></div><div class="cal-grid">' + W.split('').map(w => '<span class="cal-w">' + w + '</span>').join('') + '<span></span>'.repeat(first.getDay());
+      for (let d = 1; d <= days; d++) {
+        const dt = new Date(y, mo, d), key = ymd(dt), st = (adm[key] || {}).status || '', we = dt.getDay() === 0 || dt.getDay() === 6;
+        h += dt < today ? '<span class="cal-d">' + d + '</span>'
+          : '<button type="button" class="cal-d adm-d' + (we ? ' we' : '') + (st === '開放' ? ' on' : st === '已約' ? ' full' : '') + '" data-adm="' + key + '">' + d + '<small>' + st + '</small></button>';
+      }
+      h += '</div></div>';
+    }
+    $('#admCals').innerHTML = h;
+    const keys = Object.keys(adm).filter(k => adm[k].status && keyDate(k) >= today).sort();
+    $('#admList').innerHTML = keys.length ? '<p class="hint" style="margin:14px 0 0">每個日期可以寫說明（例如：台南・下午）：</p>' + keys.map(k => '<div class="adm-row"><span>' + (+k.slice(5, 7)) + '/' + (+k.slice(8)) + '（' + W[keyDate(k).getDay()] + '）' + adm[k].status + '</span><input type="text" data-note="' + k + '" value="' + esc(adm[k].note) + '" placeholder="說明，例如：台南・下午"></div>').join('')
+      : '<p class="hint" style="margin:14px 0 0">還沒有開放日期，點上面的日期就能開放。</p>';
+  };
+  $('#admCals').addEventListener('click', e => {
+    const b = e.target.closest('[data-adm]'); if (!b) return;
+    const k = b.dataset.adm, cur = (adm[k] || {}).status || '';
+    const next = cur === '' ? '開放' : cur === '開放' ? '已約' : '';
+    if (next) adm[k] = { note: (adm[k] && adm[k].note) || '台南', status: next }; else delete adm[k];
+    renderAdmin(); $('#admMsg').textContent = '還沒儲存';
+  });
+  $('#admList').addEventListener('input', e => { const k = e.target.dataset.note; if (k && adm[k]) { adm[k].note = e.target.value; $('#admMsg').textContent = '還沒儲存'; } });
+  $('#admSave').onclick = async () => {
+    const b = $('#admSave'); b.disabled = true; $('#admMsg').textContent = '儲存中…';
+    const dates = Object.keys(adm).filter(k => adm[k].status).sort().map(k => ({ date: k.replace(/-/g, '/'), note: adm[k].note || '', status: adm[k].status }));
+    try {
+      const j = await fetch(UPLOAD_URL, { method: 'POST', body: JSON.stringify({ admin: { key: ADMIN, dates } }) }).then(r => r.json());
+      $('#admMsg').textContent = j.ok ? '✅ 已儲存 ' + j.count + ' 個日期，網站約 1–2 分鐘內更新' : '❌ ' + (j.error || '儲存失敗');
+      if (j.ok) renderDates(dates);
+    } catch { $('#admMsg').textContent = '❌ 儲存失敗，請檢查網路再試一次'; }
+    b.disabled = false;
+  };
+
   $('#dateCal').addEventListener('click', e => {
     const nav = e.target.closest('[data-cal]');
     if (nav && !nav.disabled) { const ms = $('#dateCal')._months, k = ms.indexOf(calMonth) + (+nav.dataset.cal); if (ms[k] !== undefined) { calMonth = ms[k]; renderCal(); } return; }
@@ -802,7 +866,8 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   buildStyles();
-  if (PREVIEW) renderDates([{ date: '2026-10-10', note: '台南', status: '開放' }, { date: '2026-10-17', note: '台南', status: '開放' }, { date: '2026-10-24', note: '台南・下午', status: '已約' }, { date: '2026-11-07', note: '台南', status: '開放' }]);
+  const DEMO_DATES = [{ date: '2026-10-10', note: '台南', status: '開放' }, { date: '2026-10-17', note: '台南', status: '開放' }, { date: '2026-10-24', note: '台南・下午', status: '已約' }, { date: '2026-11-07', note: '台南', status: '開放' }];
+  if (ADMIN) { $('#adm').hidden = false; renderAdmin(); }
   const pic = (id, w) => 'https://lh3.googleusercontent.com/d/' + id + '=w' + w;
   const bindThemes = () => {
     $$('.item[data-theme]').forEach(it => it.onclick = e => {
@@ -855,7 +920,11 @@
       onSess();
     }
     if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join(''), syncAreas();
-    if (!PREVIEW && d.dates) renderDates(d.dates);
+    if (ADMIN) {
+      (d.dates || []).forEach(x => { const m = String(x.date).match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/); if (m) adm[m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0')] = { note: x.note || '', status: /已約/.test(x.status || '') ? '已約' : '開放' }; });
+      renderAdmin();
+    }
+    if (DATES_LIVE || PREVIEW || ADMIN) renderDates(d.dates && d.dates.length ? d.dates : PREVIEW ? DEMO_DATES : []);
     WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
     initGallery(true);
   }).catch(() => initGallery(true));
