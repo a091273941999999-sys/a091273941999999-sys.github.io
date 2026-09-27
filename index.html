@@ -80,6 +80,9 @@
   .cal-d.full { color: var(--dim); opacity: .55; text-decoration: line-through; }
   #datePickedText { margin: 8px 0 0; font-size: 14px; color: var(--amber); }
   #datePickedText:empty { display: none; }
+  .cal-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .cal-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .datebar .dhint a { color: var(--amber); }
   @media (max-width: 620px) { .datebar { margin: 16px 0 0; } .datebar > b, .datebar .dhint { flex-basis: 100%; } }
   .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 10px 20px; font-size: 15px; font-weight: 700;
     text-decoration: none; cursor: pointer; border: 1px solid transparent; font-family: inherit; }
@@ -293,7 +296,7 @@
 </header>
 
 <main>
-  <div class="datebar" id="dateBar" hidden><b>📅 近期開放日期</b><div class="dchips" id="dateBarChips"></div><span class="dhint">點日期直接預約 →</span></div>
+  <div class="datebar" id="dateBar" hidden><b>📅 假日開放日期</b><div class="dchips" id="dateBarChips"></div><span class="dhint">點日期直接預約 →｜平日請 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊詳談</a></span></div>
   <!-- 作品：照片放進雲端「主題照片」的主題資料夾就會自動出現（由 Apps Script 提供清單） -->
   <section id="works">
     <div class="sec-head"><span class="num">01</span><h2>作品</h2>
@@ -378,12 +381,12 @@
       <label><input type="checkbox" name="entry.1010272532" value="其他（自己提案）">其他（自己提案）</label>
     </div></div></div>
 
-    <div class="row" id="dateRow" hidden><div><label class="t">近期開放日期（可複選）</label>
+    <div class="row" id="dateRow" hidden><div><label class="t">假日開放日期（可複選）</label>
       <div class="cal" id="dateCal"></div>
       <p id="datePickedText"></p>
       <div id="dateInputs" hidden></div>
       <div class="checks" id="dateChecks" style="margin-top:10px"></div>
-      <p class="hint">點橘色的日期就能選；選了開放日期，下面就不用再填時段。</p></div></div>
+      <p class="hint">點橘色的日期就能選；選了開放日期，下面就不用再填時段。<br><b style="color:var(--text)">平日需私訊詳談</b>：請直接 <a href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">私訊 IG @xuan_lu9</a>。</p></div></div>
 
     <div class="row"><div><label class="t">可配合的拍攝場次（可複選）</label>
     <div class="checks" id="sessChecks">
@@ -641,7 +644,7 @@
     $('#dateBar').hidden = $('#dateRow').hidden = !items.length;
     $('#dateBarChips').innerHTML = items.map(x => '<button type="button" class="dchip' + (x.full ? ' full' : '') + '" data-pick="' + esc(x.label) + '"' + (x.full ? ' disabled' : '') + '>' + esc(x.label) + (x.full ? '・已約滿' : '') + '</button>').join('');
     $('#dateInputs').innerHTML = items.filter(x => !x.full).map(x => '<input type="checkbox" data-date value="' + esc(x.label) + '"' + (was.includes(x.label) ? ' checked' : '') + '>').join('');
-    $('#dateChecks').innerHTML = items.length ? '<label><input type="checkbox" id="dateNone"' + (none ? ' checked' : '') + '>以上日期都不行</label>' : '';
+    $('#dateChecks').innerHTML = items.length ? '<label><input type="checkbox" id="dateNone"' + (none ? ' checked' : '') + '>以上日期都不行／想約平日</label>' : '';
     calItems = items; renderCal(); onSess();
   };
   // 月曆：只有開放日期能點；多個月份時可以左右切換
@@ -665,7 +668,7 @@
       else if (x.full) h += '<span class="cal-d full" title="已約滿">' + d + '<small>已約滿</small></span>';
       else h += '<button type="button" class="cal-d open' + (picked.includes(x.label) ? ' on' : '') + '" data-day="' + esc(x.label) + '" title="' + esc(x.label) + '">' + d + '<small>' + esc(x.note || '開放') + '</small></button>';
     }
-    box.innerHTML = h + '</div>';
+    box.innerHTML = h + '</div><div class="cal-legend"><span><i style="border:1px solid var(--amber)"></i>假日開放</span><span><i style="background:var(--amber)"></i>已選</span><span><i style="background:var(--line)"></i>已約滿</span><span>平日請私訊</span></div>';
     box._months = months;
   };
   const pickDate = (label, on) => {
@@ -799,7 +802,7 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   buildStyles();
-  if (PREVIEW) renderDates([{ date: '2026-10-10', note: '台南', status: '開放' }, { date: '2026-10-17', note: '台南', status: '開放' }, { date: '2026-10-24', note: '台南・下午', status: '已約' }, { date: '2026-11-07', note: '嘉義', status: '開放' }]);
+  if (PREVIEW) renderDates([{ date: '2026-10-10', note: '台南', status: '開放' }, { date: '2026-10-17', note: '台南', status: '開放' }, { date: '2026-10-24', note: '台南・下午', status: '已約' }, { date: '2026-11-07', note: '台南', status: '開放' }]);
   const pic = (id, w) => 'https://lh3.googleusercontent.com/d/' + id + '=w' + w;
   const bindThemes = () => {
     $$('.item[data-theme]').forEach(it => it.onclick = e => {
