@@ -91,6 +91,9 @@
   .adm-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .adm-toggle { background: transparent; border: 1px solid var(--amber); color: var(--amber); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap; }
   .adm.closed .adm-body { display: none; }
+  .adm-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .adm-links a { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); color: var(--text); font-size: 14px; text-decoration: none; white-space: nowrap; }
+  .adm-links a:hover { border-color: var(--amber); color: var(--amber); }
   .adm-body { margin-top: 6px; }
   .adm-cals { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 12px; }
   .adm-cals .cal { max-width: none; }
@@ -322,7 +325,8 @@
 
 <main>
   <div class="adm" id="adm" hidden>
-    <div class="adm-top"><h3>🔧 管理開放日期 <small style="font-size:12px;color:var(--muted);font-weight:400">只有你看得到</small></h3><button type="button" class="adm-toggle" id="admToggle">收合 ▴</button></div>
+    <div class="adm-top"><h3>🔧 我的後台 <small style="font-size:12px;color:var(--muted);font-weight:400">只有你看得到</small></h3><button type="button" class="adm-toggle" id="admToggle">收合日期 ▴</button></div>
+    <div class="adm-links" id="admLinks"><a href="?me=1" target="_blank" rel="noopener">👀 用訪客畫面看網站</a></div>
     <div class="adm-body">
     <p class="hint" style="margin:0">點日期切換：未開放 → <b style="color:var(--amber)">開放</b> → 洽談中 → 已約 → 未開放。「洽談中」訪客仍可選（顯示為候補）。改完按「儲存」，網站約 1–2 分鐘內更新。</p>
     <div class="adm-cals" id="admCals"></div>
@@ -891,7 +895,7 @@
   const DEMO_DATES = [{ date: '2026-10-10', note: '台南', status: '開放' }, { date: '2026-10-17', note: '台南', status: '開放' }, { date: '2026-10-24', note: '台南・下午', status: '已約' }, { date: '2026-11-07', note: '台南', status: '開放' }];
   if (ADMIN) {
     $('#adm').hidden = false; renderAdmin();
-    const setAdm = open => { $('#adm').classList.toggle('closed', !open); $('#admToggle').textContent = open ? '收合 ▴' : '展開 ▾'; try { localStorage.setItem('xl_adm_open', open ? '1' : '0'); } catch {} };
+    const setAdm = open => { $('#adm').classList.toggle('closed', !open); $('#admToggle').textContent = open ? '收合日期 ▴' : '管理開放日期 ▾'; try { localStorage.setItem('xl_adm_open', open ? '1' : '0'); } catch {} };
     let admOpen = true; try { admOpen = localStorage.getItem('xl_adm_open') !== '0'; } catch {}
     setAdm(admOpen);
     $('#admToggle').onclick = () => setAdm($('#adm').classList.contains('closed'));
@@ -951,7 +955,11 @@
     if (ADMIN) {
       (d.dates || []).forEach(x => { const m = String(x.date).match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/); if (m) adm[m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0')] = { note: x.note || '', status: /已約/.test(x.status || '') ? '已約' : /洽談/.test(x.status || '') ? '洽談中' : '開放' }; });
       renderAdmin();
-      fetch(UPLOAD_URL, { method: 'POST', body: JSON.stringify({ adminList: { key: ADMIN } }) }).then(r => r.json()).then(j => { if (j.ok) { admPicks = j.picks || {}; renderAdmin(); } }).catch(() => {});
+      fetch(UPLOAD_URL, { method: 'POST', body: JSON.stringify({ adminList: { key: ADMIN } }) }).then(r => r.json()).then(j => {
+        if (!j.ok) return;
+        admPicks = j.picks || {}; renderAdmin();
+        $('#admLinks').innerHTML = (j.links || []).map(l => '<a href="' + esc(l.u) + '" target="_blank" rel="noopener">' + esc(l.t) + '</a>').join('') + '<a href="?me=1" target="_blank" rel="noopener">👀 用訪客畫面看網站</a>';
+      }).catch(() => {});
     }
     if (DATES_LIVE || PREVIEW || ADMIN) renderDates(d.dates && d.dates.length ? d.dates : PREVIEW ? DEMO_DATES : []);
     WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
