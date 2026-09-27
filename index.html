@@ -53,6 +53,18 @@
   .hero .sub { margin: 8px 0 0; color: #d9d4cc; font-size: 15px; letter-spacing: 1px; }
   .hero .sub span { margin-right: 10px; }
   .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .datebar { margin: 20px auto 0; max-width: 1080px; padding: 14px 18px; background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+  .datebar[hidden] { display: none; }
+  .datebar > b { font-size: 15px; letter-spacing: 1px; white-space: nowrap; }
+  .dchips { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+  .dchip { background: transparent; border: 1px solid var(--amber); color: var(--amber); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 14px; cursor: pointer; }
+  .dchip:hover { background: var(--amber-dim); }
+  .dchip.full, .checks label.full { border-color: var(--line); color: var(--dim); cursor: not-allowed; background: transparent; text-decoration: line-through; }
+  .dchip.full:hover { background: transparent; }
+  .datebar .dhint { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .dchip { white-space: nowrap; }
+  @media (max-width: 620px) { .datebar { margin: 16px 0 0; } .datebar > b, .datebar .dhint { flex-basis: 100%; } }
   .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 10px 20px; font-size: 15px; font-weight: 700;
     text-decoration: none; cursor: pointer; border: 1px solid transparent; font-family: inherit; }
   .btn-amber { background: var(--amber); color: #1a1206; }
@@ -265,6 +277,7 @@
 </header>
 
 <main>
+  <div class="datebar" id="dateBar" hidden><b>📅 近期開放日期</b><div class="dchips" id="dateBarChips"></div><span class="dhint">點日期直接預約 →</span></div>
   <!-- 作品：照片放進雲端「主題照片」的主題資料夾就會自動出現（由 Apps Script 提供清單） -->
   <section id="works">
     <div class="sec-head"><span class="num">01</span><h2>作品</h2>
@@ -348,6 +361,10 @@
       <label><input type="checkbox" name="entry.1010272532" value="衝突美學（視覺、情緒、邏輯）">衝突美學</label>
       <label><input type="checkbox" name="entry.1010272532" value="其他（自己提案）">其他（自己提案）</label>
     </div></div></div>
+
+    <div class="row" id="dateRow" hidden><div><label class="t">近期開放日期（可複選）</label>
+      <div class="checks" id="dateChecks"></div>
+      <p class="hint">選了開放日期，下面就不用再填時段。</p></div></div>
 
     <div class="row"><div><label class="t">可配合的拍攝場次（可複選）</label>
     <div class="checks" id="sessChecks">
@@ -578,7 +595,8 @@
   const isOther = v => !v.startsWith('平日') && !v.startsWith('假日');
   const needWd = () => sess().some(v => v.startsWith('平日') || isOther(v));
   const needWe = () => sess().some(v => v.startsWith('假日') || isOther(v));
-  const onSess = () => { $('#timeBox').hidden = !sess().length; $('#wdBox').hidden = !needWd(); $('#weBox').hidden = !needWe(); };
+  const pickedDates = () => $$('[data-date]:checked').map(i => i.value);
+  const onSess = () => { $('#timeBox').hidden = !sess().length || pickedDates().length > 0; $('#wdBox').hidden = !needWd(); $('#weBox').hidden = !needWe(); };
   // 拍攝地區卡片 ⇄ 拍攝場次勾選同步（「嘉義、雲林」會同時勾兩個）
   const areaBoxes = a => { const parts = a.querySelector('b').textContent.replace('📍', '').trim().split(/[、,，\s]+/).filter(Boolean);
     return $$('input[name="entry.2098647330"]').filter(i => parts.some(p => i.value.includes(p))); };
@@ -590,12 +608,43 @@
     onSess(); syncAreas();
   });
   $('#sessChecks').addEventListener('change', () => { onSess(); syncAreas(); });
+  // 近期開放日期：來自試算表「開放日期」分頁；過期的不顯示，「已約」顯示為已約滿
+  const PREVIEW = new URLSearchParams(location.search).get('preview') === '1';
+  const renderDates = list => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const W = '日一二三四五六';
+    const items = (list || []).map(x => {
+      const m = String(x.date || '').match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/); if (!m) return null;
+      const dt = new Date(+m[1], m[2] - 1, +m[3]); if (dt < today) return null;
+      return { label: (+m[2]) + '/' + (+m[3]) + '（' + W[dt.getDay()] + '）' + (x.note ? ' ' + x.note : ''), full: /已約|額滿|滿/.test(x.status || ''), t: dt };
+    }).filter(Boolean).sort((a, b) => a.t - b.t);
+    const was = pickedDates(), none = $('#dateNone')?.checked;
+    $('#dateBar').hidden = $('#dateRow').hidden = !items.length;
+    $('#dateBarChips').innerHTML = items.map(x => '<button type="button" class="dchip' + (x.full ? ' full' : '') + '" data-pick="' + esc(x.label) + '"' + (x.full ? ' disabled' : '') + '>' + esc(x.label) + (x.full ? '・已約滿' : '') + '</button>').join('');
+    $('#dateChecks').innerHTML = items.map(x => '<label' + (x.full ? ' class="full"' : '') + '><input type="checkbox" data-date value="' + esc(x.label) + '"' + (x.full ? ' disabled' : was.includes(x.label) ? ' checked' : '') + '>' + esc(x.label) + (x.full ? '・已約滿' : '') + '</label>').join('') +
+      (items.length ? '<label><input type="checkbox" id="dateNone"' + (none ? ' checked' : '') + '>以上日期都不行</label>' : '');
+    onSess();
+  };
+  $('#dateChecks').addEventListener('change', e => {
+    if (e.target.id === 'dateNone' && e.target.checked) $$('[data-date]').forEach(i => { i.checked = false; });
+    if (e.target.matches('[data-date]') && e.target.checked && $('#dateNone')) $('#dateNone').checked = false;
+    onSess();
+  });
+  $('#dateBar').addEventListener('click', e => {
+    const b = e.target.closest('[data-pick]'); if (!b || b.disabled) return;
+    const i = $$('[data-date]').find(x => x.value === b.dataset.pick); if (!i) return;
+    i.checked = true; if ($('#dateNone')) $('#dateNone').checked = false; onSess();
+    $('#dateRow').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
   const timeText = () => {
+    if (pickedDates().length) return '指定日期：' + pickedDates().join('、');
     const wd = needWd() ? $$('[data-wd]:checked').map(i => i.value) : [], we = needWe() ? $$('[data-we]:checked').map(i => i.value) : [];
     const note = $('#timeNote').value.trim();
     return [wd.length && '平日：' + wd.join('、'), we.length && '假日：' + we.join('、'), note && '補充：' + note].filter(Boolean).join('｜');
   };
   const timeMissing = () => {
+    if (!$('#dateRow').hidden && !pickedDates().length && !$('#dateNone')?.checked) return '請選一個開放日期，或勾「以上日期都不行」';
+    if (pickedDates().length) return '';
     if (!sess().length) return '';
     const wd = $$('[data-wd]:checked').length, we = $$('[data-we]:checked').length;
     const onlyOther = sess().every(isOther);
@@ -665,7 +714,7 @@
     if (!fd.get('entry.119148823').trim()) fd.set('entry.119148823', '未填');
     if (!areaOther.hidden) fd.set('entry.1166445254', ['【住：' + areaOther.value.trim() + '】', fd.get('entry.1166445254')].filter(Boolean).join(' '));
     if (!fd.getAll('entry.1010272532').length) { msg.textContent = '❌ 請至少選一個主題'; return; }
-    const tm = timeMissing(); if (tm) { msg.textContent = '❌ ' + tm; $('#timeBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    const tm = timeMissing(); if (tm) { msg.textContent = '❌ ' + tm; ($('#dateRow').hidden ? $('#timeBox') : $('#dateRow')).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     fd.set(ENTRY_TIME, timeText());
     fd.set('entry.178669148', lookText());
     const photos = [...$('#photos').files].filter(p => p.type.startsWith('image/'));
@@ -697,6 +746,7 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   buildStyles();
+  if (PREVIEW) renderDates([{ date: '2026-10-10', note: '台南', status: '開放' }, { date: '2026-10-17', note: '台南', status: '開放' }, { date: '2026-10-24', note: '台南・下午', status: '已約' }]);
   const pic = (id, w) => 'https://lh3.googleusercontent.com/d/' + id + '=w' + w;
   const bindThemes = () => {
     $$('.item[data-theme]').forEach(it => it.onclick = e => {
@@ -749,6 +799,7 @@
       onSess();
     }
     if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join(''), syncAreas();
+    if (!PREVIEW && d.dates) renderDates(d.dates);
     WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
     initGallery(true);
   }).catch(() => initGallery(true));
