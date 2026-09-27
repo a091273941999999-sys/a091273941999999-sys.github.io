@@ -97,10 +97,15 @@
   .cal-d.adm-d { cursor: pointer; color: var(--muted); border-color: var(--line); }
   .cal-d.adm-d.we { color: var(--text); }
   .cal-d.adm-d.full { text-decoration: none; opacity: 1; background: var(--line); color: var(--muted); }
-  .adm-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+  .adm-row { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; margin-top: 8px; }
   .adm-row span { white-space: nowrap; min-width: 128px; font-size: 14px; }
-  .adm-row input { flex: 1; min-width: 0; padding: 8px 12px; }
+  .adm-row input { flex: 1 1 240px; min-width: 0; padding: 8px 12px; }
   @media (max-width: 620px) { .adm { margin: 16px 0 0; } .adm-row { flex-wrap: wrap; gap: 4px; } .adm-row span { min-width: 0; } .adm-row input { flex-basis: 100%; } }
+  .dchip.pend { border-style: dashed; }
+  .cal-d.open.pend { border-style: dashed; }
+  .cal-d.adm-d.pend { border: 1px dashed var(--amber); color: var(--amber); }
+  .adm-picks { flex-basis: 100%; font-size: 12px; color: var(--muted); margin: 2px 0 4px; }
+  .adm-picks b { color: var(--amber); }
   .adm-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
   @media (max-width: 620px) { .datebar { margin: 16px 0 0; } .datebar > b, .datebar .dhint { flex-basis: 100%; } }
   .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 10px 20px; font-size: 15px; font-weight: 700;
@@ -319,7 +324,7 @@
   <div class="adm" id="adm" hidden>
     <div class="adm-top"><h3>🔧 管理開放日期 <small style="font-size:12px;color:var(--muted);font-weight:400">只有你看得到</small></h3><button type="button" class="adm-toggle" id="admToggle">收合 ▴</button></div>
     <div class="adm-body">
-    <p class="hint" style="margin:0">點日期切換：未開放 → <b style="color:var(--amber)">開放</b> → 已約 → 未開放。改完按「儲存」，網站約 1–2 分鐘內更新。</p>
+    <p class="hint" style="margin:0">點日期切換：未開放 → <b style="color:var(--amber)">開放</b> → 洽談中 → 已約 → 未開放。「洽談中」訪客仍可選（顯示為候補）。改完按「儲存」，網站約 1–2 分鐘內更新。</p>
     <div class="adm-cals" id="admCals"></div>
     <div id="admList"></div>
     <div class="adm-bar"><button type="button" class="btn btn-amber" id="admSave">儲存</button><span id="admMsg" class="hint" style="margin:0"></span></div>
@@ -672,11 +677,11 @@
     const items = (list || []).map(x => {
       const m = String(x.date || '').match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/); if (!m) return null;
       const dt = new Date(+m[1], m[2] - 1, +m[3]); if (dt < today) return null;
-      return { label: (+m[2]) + '/' + (+m[3]) + '（' + W[dt.getDay()] + '）' + (x.note ? ' ' + x.note : ''), note: x.note || '', full: /已約|額滿|滿/.test(x.status || ''), t: dt };
+      return { label: (+m[2]) + '/' + (+m[3]) + '（' + W[dt.getDay()] + '）' + (x.note ? ' ' + x.note : ''), note: x.note || '', full: /已約|額滿|滿/.test(x.status || ''), pend: /洽談/.test(x.status || ''), t: dt };
     }).filter(Boolean).sort((a, b) => a.t - b.t);
     const was = pickedDates(), none = $('#dateNone')?.checked;
     $('#dateBar').hidden = $('#dateRow').hidden = !items.length;
-    $('#dateBarChips').innerHTML = items.map(x => '<button type="button" class="dchip' + (x.full ? ' full' : '') + '" data-pick="' + esc(x.label) + '"' + (x.full ? ' disabled' : '') + '>' + esc(x.label) + (x.full ? '・已約滿' : '') + '</button>').join('');
+    $('#dateBarChips').innerHTML = items.map(x => '<button type="button" class="dchip' + (x.full ? ' full' : x.pend ? ' pend' : '') + '" data-pick="' + esc(x.label) + '"' + (x.full ? ' disabled' : '') + '>' + esc(x.label) + (x.full ? '・已約滿' : x.pend ? '・洽談中（可候補）' : '') + '</button>').join('');
     $('#dateInputs').innerHTML = items.filter(x => !x.full).map(x => '<input type="checkbox" data-date value="' + esc(x.label) + '"' + (was.includes(x.label) ? ' checked' : '') + '>').join('');
     $('#dateChecks').innerHTML = items.length ? '<label><input type="checkbox" id="dateNone"' + (none ? ' checked' : '') + '>還不確定／以上日期都不行／想約平日</label>' : '';
     calItems = items; renderCal(); onSess();
@@ -700,9 +705,9 @@
       const x = byDay[d];
       if (!x) h += '<span class="cal-d">' + d + '</span>';
       else if (x.full) h += '<span class="cal-d full" title="已約滿">' + d + '<small>已約滿</small></span>';
-      else h += '<button type="button" class="cal-d open' + (picked.includes(x.label) ? ' on' : '') + '" data-day="' + esc(x.label) + '" title="' + esc(x.label) + '">' + d + '<small>' + esc(x.note || '開放') + '</small></button>';
+      else h += '<button type="button" class="cal-d open' + (x.pend ? ' pend' : '') + (picked.includes(x.label) ? ' on' : '') + '" data-day="' + esc(x.label) + '" title="' + esc(x.label) + (x.pend ? '（洽談中，可候補）' : '') + '">' + d + '<small>' + esc(x.pend ? '洽談中' : (x.note || '開放')) + '</small></button>';
     }
-    box.innerHTML = h + '</div><div class="cal-legend"><span><i style="border:1px solid var(--amber)"></i>假日開放</span><span><i style="background:var(--amber)"></i>已選</span><span><i style="background:var(--line)"></i>已約滿</span><span>平日請私訊</span></div>';
+    box.innerHTML = h + '</div><div class="cal-legend"><span><i style="border:1px solid var(--amber)"></i>假日開放</span><span><i style="border:1px dashed var(--amber)"></i>洽談中</span><span><i style="background:var(--amber)"></i>已選</span><span><i style="background:var(--line)"></i>已約滿</span><span>平日請私訊</span></div>';
     box._months = months;
   };
   const pickDate = (label, on) => {
@@ -716,6 +721,7 @@
   const ADMIN = new URLSearchParams(location.search).get('admin');
   const DATES_LIVE = true; // 開放日期對所有訪客顯示（改 false 可暫時關閉）
   const adm = {};
+  let admPicks = {};
   const ymd = dt => dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
   const keyDate = k => new Date(k.slice(0, 4), k.slice(5, 7) - 1, +k.slice(8, 10));
   const renderAdmin = () => {
@@ -728,19 +734,20 @@
       for (let d = 1; d <= days; d++) {
         const dt = new Date(y, mo, d), key = ymd(dt), st = (adm[key] || {}).status || '', we = dt.getDay() === 0 || dt.getDay() === 6;
         h += dt < today ? '<span class="cal-d">' + d + '</span>'
-          : '<button type="button" class="cal-d adm-d' + (we ? ' we' : '') + (st === '開放' ? ' on' : st === '已約' ? ' full' : '') + '" data-adm="' + key + '">' + d + '<small>' + st + '</small></button>';
+          : '<button type="button" class="cal-d adm-d' + (we ? ' we' : '') + (st === '開放' ? ' on' : st === '洽談中' ? ' pend' : st === '已約' ? ' full' : '') + '" data-adm="' + key + '">' + d + '<small>' + (st === '洽談中' ? '洽談' : st) + ((admPicks[key] || []).length ? '・' + admPicks[key].length + '人' : '') + '</small></button>';
       }
       h += '</div></div>';
     }
     $('#admCals').innerHTML = h;
     const keys = Object.keys(adm).filter(k => adm[k].status && keyDate(k) >= today).sort();
-    $('#admList').innerHTML = keys.length ? '<p class="hint" style="margin:14px 0 0">每個日期可以寫說明（例如：台南・下午）：</p>' + keys.map(k => '<div class="adm-row"><span>' + (+k.slice(5, 7)) + '/' + (+k.slice(8)) + '（' + W[keyDate(k).getDay()] + '）' + adm[k].status + '</span><input type="text" data-note="' + k + '" value="' + esc(adm[k].note) + '" placeholder="說明，例如：台南・下午"></div>').join('')
+    $('#admList').innerHTML = keys.length ? '<p class="hint" style="margin:14px 0 0">每個日期可以寫說明（例如：台南・下午）：</p>' + keys.map(k => '<div class="adm-row"><span>' + (+k.slice(5, 7)) + '/' + (+k.slice(8)) + '（' + W[keyDate(k).getDay()] + '）' + adm[k].status + '</span><input type="text" data-note="' + k + '" value="' + esc(adm[k].note) + '" placeholder="說明，例如：台南・下午">' +
+      ((admPicks[k] || []).length ? '<div class="adm-picks"><b>' + admPicks[k].length + ' 人選了這天：</b>' + admPicks[k].map(p => esc(p.name || '（未填名字）') + (p.ig ? '（' + esc(p.ig) + '）' : '')).join('、') + '</div>' : '') + '</div>').join('')
       : '<p class="hint" style="margin:14px 0 0">還沒有開放日期，點上面的日期就能開放。</p>';
   };
   $('#admCals').addEventListener('click', e => {
     const b = e.target.closest('[data-adm]'); if (!b) return;
     const k = b.dataset.adm, cur = (adm[k] || {}).status || '';
-    const next = cur === '' ? '開放' : cur === '開放' ? '已約' : '';
+    const next = cur === '' ? '開放' : cur === '開放' ? '洽談中' : cur === '洽談中' ? '已約' : '';
     if (next) adm[k] = { note: (adm[k] && adm[k].note) || '台南', status: next }; else delete adm[k];
     renderAdmin(); $('#admMsg').textContent = '還沒儲存';
   });
@@ -942,8 +949,9 @@
     }
     if (d.areas && d.areas.length) $('.areas').innerHTML = d.areas.map(a => '<div class="area"><b>📍 ' + esc(a.name) + '</b><span>' + esc(a.note) + '</span></div>').join(''), syncAreas();
     if (ADMIN) {
-      (d.dates || []).forEach(x => { const m = String(x.date).match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/); if (m) adm[m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0')] = { note: x.note || '', status: /已約/.test(x.status || '') ? '已約' : '開放' }; });
+      (d.dates || []).forEach(x => { const m = String(x.date).match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/); if (m) adm[m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0')] = { note: x.note || '', status: /已約/.test(x.status || '') ? '已約' : /洽談/.test(x.status || '') ? '洽談中' : '開放' }; });
       renderAdmin();
+      fetch(UPLOAD_URL, { method: 'POST', body: JSON.stringify({ adminList: { key: ADMIN } }) }).then(r => r.json()).then(j => { if (j.ok) { admPicks = j.picks || {}; renderAdmin(); } }).catch(() => {});
     }
     if (DATES_LIVE || PREVIEW || ADMIN) renderDates(d.dates && d.dates.length ? d.dates : PREVIEW ? DEMO_DATES : []);
     WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
