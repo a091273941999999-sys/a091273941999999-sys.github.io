@@ -226,6 +226,7 @@
   /* ── 表單 ── */
   form { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; }
   .row { display: grid; gap: 14px; margin-bottom: 16px; }
+  .row[hidden] { display: none; }
   .c2 { grid-template-columns: repeat(2, 1fr); } .c3 { grid-template-columns: repeat(3, 1fr); }
   label.t { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
   input[type=text], input[type=email], input[type=url], select, textarea {
@@ -713,7 +714,7 @@
   };
   // ── 管理開放日期（網址帶 ?admin=密碼 才會出現）──
   const ADMIN = new URLSearchParams(location.search).get('admin');
-  const DATES_LIVE = false; // 正式開放給所有訪客前先維持 false
+  const DATES_LIVE = true; // 開放日期對所有訪客顯示（改 false 可暫時關閉）
   const adm = {};
   const ymd = dt => dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
   const keyDate = k => new Date(k.slice(0, 4), k.slice(5, 7) - 1, +k.slice(8, 10));
