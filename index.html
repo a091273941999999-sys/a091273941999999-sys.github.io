@@ -296,9 +296,50 @@
     .gallery .more-card { flex-basis: 160px; }
     .gnav { display: none; }
   }
+
+  /* ── 隱藏企劃（?s=邀請碼）── */
+  #secret { position: fixed; inset: 0; z-index: 100; overflow-y: auto; background: radial-gradient(ellipse at 50% -10%, #1d212a 0%, #0a0c10 62%); color: var(--text); }
+  #secret[hidden] { display: none; }
+  .sc-wrap { max-width: 720px; margin: 0 auto; padding: 22px 20px 80px; }
+  .sc-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--dim); letter-spacing: 1px; }
+  .sc-top button { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 5px 14px; font: inherit; cursor: pointer; }
+  .sc-top button:hover { color: var(--text); border-color: var(--muted); }
+  .sc-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .sc-tabs button { background: var(--card); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 5px 14px; font: inherit; font-size: 14px; cursor: pointer; }
+  .sc-tabs button.on { color: #1a1206; background: #c9a45c; border-color: #c9a45c; }
+  .sc-hero { text-align: center; margin: 56px 0 44px; }
+  .sc-hero h1 { font-family: var(--serif); font-weight: 900; font-size: clamp(44px, 13vw, 76px); letter-spacing: .3em; margin: 0 0 0 .3em; color: #e9dcc0; line-height: 1.2; }
+  .sc-hero p { font-family: var(--serif); color: var(--muted); margin: 16px 0 0; font-size: 16px; letter-spacing: 1px; }
+  .sc-hero .seal { display: inline-block; margin-top: 22px; background: #8e2f28; color: #f0e3d6; font-family: var(--serif); font-weight: 700; font-size: 12px; padding: 5px 6px; border-radius: 2px; letter-spacing: 1px; }
+  .sc-sec { margin: 48px 0; }
+  .sc-sec > h2 { font-family: var(--serif); font-size: 20px; letter-spacing: .15em; margin: 0 0 16px; padding-left: 12px; border-left: 3px solid #c9a45c; }
+  .sc-sec p { margin: 0 0 14px; color: #d8d4cc; }
+  .sc-sec h4 { margin: 18px 0 6px; font-size: 15px; color: #e9dcc0; }
+  .sc-sec ul { margin: 0 0 14px; padding-left: 1.2em; color: #d8d4cc; }
+  .sc-sec li { margin: 3px 0; }
+  .sc-story p { font-family: var(--serif); font-size: 17px; line-height: 2; color: #e4ded2; }
+  .sc-shots { display: grid; gap: 12px; }
+  .sc-shot { background: rgb(23 28 36 / .8); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .sc-shot h3 { font-family: var(--serif); font-size: 16px; margin: 0 0 6px; color: #e9dcc0; letter-spacing: 1px; }
+  .sc-shot p { margin: 0; }
+  .sc-shot .meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .sc-shot .meta b { color: #c9a45c; font-weight: 500; }
+  .sc-cta { text-align: center; margin: 64px 0 24px; }
+  .sc-cta p { color: var(--muted); }
+  .sc-cta .btn { margin: 6px; }
+  .sc-inv { margin-top: 56px; padding: 16px; border: 1px dashed #c9a45c; border-radius: 12px; font-size: 14px; }
+  .sc-inv h2 { font-size: 16px; margin: 0 0 6px; color: #e9dcc0; }
+  .sc-inv .r { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .sc-inv .r:first-of-type { border-top: 0; }
+  .sc-inv .who { font-weight: 700; min-width: 7em; }
+  .sc-inv .st { font-size: 12px; color: var(--muted); }
+  .sc-inv .off { opacity: .55; }
+  .sc-inv button { margin-left: auto; background: var(--card); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 13px; cursor: pointer; }
 </style>
 </head>
 <body>
+<div id="secret" hidden></div>
+
 
 <nav class="nav">
   <a class="brand" href="#top">玄鹿<small>xuan_lu9 · portrait</small></a>
@@ -965,6 +1006,63 @@
     WORKS.splice(0, WORKS.length, ...(d.photos || []).map(p => ({ src: pic(p.id, 1600), thumb: pic(p.id, 900), theme: p.theme, credit: p.credit || '' })));
     initGallery(true);
   }).catch(() => initGallery(true));
+
+  // ── 隱藏企劃：網址帶 ?s=邀請碼 → 跟後端要內容；碼不對就什麼都不顯示 ──
+  const SECRET = new URLSearchParams(location.search).get('s');
+  if (SECRET) fetch(UPLOAD_URL, { method: 'POST', body: JSON.stringify({ secret: { code: SECRET } }) }).then(r => r.json()).then(j => {
+    if (!j.ok || !(j.blocks || []).length) return;
+    const box = $('#secret'), plans = [...new Set(j.blocks.map(b => b.p))];
+    const text = t => {
+      const out = []; let ul = [], p = [];
+      const flushP = () => { if (p.length) out.push('<p>' + p.map(esc).join('<br>') + '</p>'); p = []; };
+      const flushU = () => { if (ul.length) out.push('<ul>' + ul.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>'); ul = []; };
+      const lines = String(t || '').split('\n');
+      lines.forEach((l, i) => {
+        const b = l.match(/^\s*[・•\-]\s*(.*)$/);
+        if (b) { flushP(); ul.push(b[1]); return; }
+        flushU();
+        if (!l.trim()) { flushP(); return; }
+        const next = lines[i + 1] || '';
+        if (!p.length && l.trim().length <= 20 && /^\s*[・•\-]/.test(next)) { out.push('<h4>' + esc(l.trim()) + '</h4>'); return; }
+        p.push(l.trim());
+      });
+      flushP(); flushU();
+      return out.join('');
+    };
+    const render = plan => {
+      const bs = j.blocks.filter(b => b.p === plan), cover = bs.find(b => b.t === '封面') || { h: plan, b: '' };
+      let h = '<div class="sc-wrap"><div class="sc-top"><span>🔒 私藏企劃・請勿外流</span><button type="button" id="scClose">回網站</button></div>';
+      if (plans.length > 1) h += '<div class="sc-tabs">' + plans.map(x => '<button type="button" data-plan="' + esc(x) + '"' + (x === plan ? ' class="on"' : '') + '>' + esc(x) + '</button>').join('') + '</div>';
+      h += '<div class="sc-hero"><h1>' + esc(cover.h || plan) + '</h1>' + (cover.b ? '<p>' + esc(cover.b) + '</p>' : '') + '<span class="seal">玄鹿</span></div>';
+      let shots = [];
+      const flushShots = () => { if (shots.length) h += '<section class="sc-sec"><h2>分鏡</h2><div class="sc-shots">' + shots.join('') + '</div></section>'; shots = []; };
+      bs.forEach(b => {
+        if (b.t === '封面') return;
+        if (b.t === '分鏡') {
+          shots.push('<div class="sc-shot"><h3>' + esc(b.h) + '</h3><p>' + esc(b.b) + '</p>' + (b.e || b.n ? '<div class="meta">' + (b.e ? '<b>情緒</b><span>' + esc(b.e) + '</span>' : '') + (b.n ? '<b>光線</b><span>' + esc(b.n) + '</span>' : '') + '</div>' : '') + '</div>');
+          return;
+        }
+        flushShots();
+        h += '<section class="sc-sec' + (/故事/.test(b.h) ? ' sc-story' : '') + '"><h2>' + esc(b.h) + '</h2>' + text(b.b) + '</section>';
+      });
+      flushShots();
+      h += '<div class="sc-cta"><p>想一起完成這組作品嗎？</p><a class="btn btn-amber" href="https://ig.me/m/xuan_lu9" target="_blank" rel="noopener">💬 IG 私訊 @xuan_lu9</a><a class="btn btn-ghost" href="#f" id="scForm">填寫報名表</a></div>';
+      if (j.invites) {
+        const base = location.origin + location.pathname + '?s=';
+        h += '<div class="sc-inv"><h2>🔑 分享名單（只有你看得到）</h2><div class="st">在「網站內容設定」試算表的「邀請碼」分頁新增或關閉；開啟填「是」連結才會生效。</div>' +
+          (j.invites.length ? j.invites.map(v => '<div class="r' + (/^(是|開|y|on|true|v|✓)/i.test(v.on) ? '' : ' off') + '"><span class="who">' + esc(v.who || '（未命名）') + '</span><span class="st">' + esc(v.plans || '全部') + '・' + (/^(是|開|y|on|true|v|✓)/i.test(v.on) ? '開啟' : '關閉') + '・看過 ' + esc(v.n || 0) + ' 次' + (v.last ? '・最後 ' + esc(v.last) : '') + '</span><button type="button" data-copy="' + esc(base + v.code) + '">複製連結</button></div>').join('') : '<div class="st">還沒有邀請碼。</div>') + '</div>';
+      }
+      box.innerHTML = h + '</div>';
+      box.scrollTop = 0;
+      $$('#secret [data-plan]').forEach(b => b.onclick = () => render(b.dataset.plan));
+      $$('#secret [data-copy]').forEach(b => b.onclick = () => { navigator.clipboard.writeText(b.dataset.copy).then(() => { b.textContent = '已複製 ✓'; setTimeout(() => b.textContent = '複製連結', 1500); }, () => prompt('複製這個連結', b.dataset.copy)); });
+      const close = () => { box.hidden = true; document.body.style.overflow = ''; };
+      $('#scClose').onclick = close;
+      $('#scForm').onclick = e => { e.preventDefault(); close(); $('#f').scrollIntoView({ behavior: 'smooth' }); };
+    };
+    render(plans[0]);
+    box.hidden = false; document.body.style.overflow = 'hidden';
+  }).catch(() => {});
 </script>
 </body>
 </html>
