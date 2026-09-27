@@ -755,6 +755,7 @@
     b.disabled = false;
   };
 
+  $('#dateBox').addEventListener('toggle', () => { if ($('#dateBox').open) renderCal(); });
   $('#dateCal').addEventListener('click', e => {
     const nav = e.target.closest('[data-cal]');
     if (nav && !nav.disabled) { const ms = $('#dateCal')._months, k = ms.indexOf(calMonth) + (+nav.dataset.cal); if (ms[k] !== undefined) { calMonth = ms[k]; renderCal(); } return; }
